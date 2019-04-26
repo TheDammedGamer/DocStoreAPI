@@ -10,7 +10,5 @@ namespace DocStoreAPI.Models
     {
         public MetadataEntity Metadata;
         public Stream DocumentData;
-        //Only Return if Specifically asked for and User is Auditor
-        public DocumentAudit AuditData;
     }
 }
