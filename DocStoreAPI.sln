@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.168
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocStoreAPI", "DocStoreAPI\DocStoreAPI.csproj", "{EC4A9741-96F8-4659-8D61-2FE0630B73D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocStoreAPI", "DocStoreAPI\DocStoreAPI.csproj", "{EC4A9741-96F8-4659-8D61-2FE0630B73D9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
