@@ -9,8 +9,8 @@ namespace DocStoreAPI.Models
     {
         public bool Is { get; protected set; }
         public string By { get; protected set; }
-        public DateTime At { get; protected set; }
-        public DateTime Expiration { get; protected set; }
+        public DateTime? At { get; protected set; }
+        public DateTime? Expiration { get; protected set; }
 
         public LockState()
         {

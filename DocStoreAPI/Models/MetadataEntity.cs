@@ -22,6 +22,9 @@ namespace DocStoreAPI.Models
         [Required]
         public string BuisnessArea { get; set; }
 
+        public int BuisnessAreaEntityID { get; set; }
+        public BuisnessAreaEntity BuisnessAreaEntity { get; set; }
+
         public List<CustomMetadataEntity> CustomMetadata { get; set; }
         public List<DocumentVersionEntity> Versions { get; set; }
 

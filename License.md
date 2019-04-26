@@ -1,23 +1,3 @@
-# DocStoreAPI
-A simple asp.net core document managment api, backed by SQL Server, AzureAd, ActiveDirectory, Azure storage and SMB shares.
-
-At it's core DocStorAPI is a simple document management API designed to be easily intergratable with other projects that require an auditable service.
-
-## To-Do
-- [ ] Implement metadata filtering to ensure that when values which consist of the FileName are changed then the relevant filename is changed aswell.
-- [ ] Implement a Security Controller(s) to Manage Groups and Access Control Entity
-- [ ] Add a Client library
-- [ ] Add an example WPF app
-
-## Version 2 improvements
-- Implement simple polices based upon BuisnessArea to define the `stor` used for specific documents.
-- Add Support for MySql as an alternative database
-- Add Support for Comsmos DB as an alternative database (requires .net core 3)
-- Add Support for AWS storage
-- Look into supporting other Identity providers
-
-
-
 # MIT License
 
 Copyright (c) 2019 Liam Townsend

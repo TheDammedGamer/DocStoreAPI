@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication;
 using DocStoreAPI.Models;
 using DocStoreAPI.Models.Stor;
-using DocStoreAPI.Services;
 using DocStoreAPI.Repositories;
 
 namespace DocStoreAPI

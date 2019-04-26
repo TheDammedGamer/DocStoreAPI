@@ -16,17 +16,21 @@ namespace DocStoreAPI
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            BuildWebHost(args).Run();
         }
 
-        //Left as Defulat to support In-Process IIS Hosting
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+
+        public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseIISIntegration()
-                .ConfigureAppConfiguration((hostingContext, config) =>
+                .ConfigureAppConfiguration((context, config) =>
                 {
-                    config.AddEnvironmentVariables();
+                    config
+                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                        .AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: false, reloadOnChange: true);
+                    context.Configuration = config.Build();
                 })
-                .UseStartup<Startup>();
+                .UseIISIntegration()
+                .UseStartup<Startup>()
+                .Build();
     }
 }

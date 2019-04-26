@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,11 +8,17 @@ namespace DocStoreAPI.Models
 {
     public class DocumentVersionEntity : EntityBase
     {
+        [Required]
         public int DocumentId { get; set; }
+        [Required]
         public string Name { get; set; }
+        [Required]
         public int Version { get; set; }
+        [Required]
         public string MD5Hash { get; set; } //D10CFB0D2819A862937A6D66E9CAE223
+        [Required]
         public string StorName { get; set; }
+        [Required]
         public string Extension { get; set; }
 
         public DocumentVersionEntity()

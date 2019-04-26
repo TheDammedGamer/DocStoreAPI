@@ -13,6 +13,8 @@ namespace DocStoreAPI.Models
 
         public string ADName { get; set; }
         public string AzureName { get; set; }
+
+        public List<AccessControlEntity> RelevantACEs { get; set; }
         //public Guid AzureID { get; set; } //Don't think I need
 
         public GroupEntity()
