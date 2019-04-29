@@ -33,13 +33,12 @@ namespace DocStoreAPI.Controllers
         public IActionResult ListByBuisnessArea(string buisnessArea)
         {
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Return, buisnessArea))
-            {
-                _securityRepository.LogUserAction(HttpContext, AccessLogAction.DocumentMetadataSearched, buisnessArea, "Metadata", false);
-                return Unauthorized();
-            }
-                
+                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentMetadataSearched, "Metadata", buisnessArea);
 
             List<MetadataEntity> metaItems = _metadataRepository.ListByBuisnessArea(buisnessArea, false, false).ToList();
+
+            if (metaItems.Count == 0)
+                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentMetadataSearched, "Metadata", buisnessArea);
 
             _logger.Log(LogLevel.Information, "Getting DocumentMetadata Within BuisnessArea {0} for User {1}", buisnessArea, HttpContext.User.Identity.Name);
             _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataSearched, buisnessArea, "Metadata", true);
@@ -55,16 +54,10 @@ namespace DocStoreAPI.Controllers
             MetadataEntity item = _metadataRepository.GetById(id, false, false);
 
             if (item == null)
-            {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataRead, id, "Metadata", false);
-                return NotFound(id);
-            }
+                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentMetadataRead, "Metadata", id.ToString());
 
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Return, item.BuisnessArea))
-            {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataRead, id, "Metadata", false);
-                return Unauthorized();
-            }
+                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentMetadataRead, "Metadata", id.ToString());
 
             _logger.Log(LogLevel.Information, "DocumentMetadata {0} Returned For {1}", item.Id, HttpContext.User.Identity.Name);
             _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataRead, id, "Metadata", true);
@@ -77,10 +70,7 @@ namespace DocStoreAPI.Controllers
         public IActionResult Post([FromBody] MetadataEntity value)
         {
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Create ,value.BuisnessArea))
-            {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataCreate, "NA", "Metadata", false);
-                return Unauthorized();
-            }
+                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentMetadataCreate, "Metadata", "N/A");
 
             var valueWId =_metadataRepository.Add(value);
 
@@ -97,17 +87,11 @@ namespace DocStoreAPI.Controllers
             MetadataEntity origItem = _metadataRepository.GetById(id, false, false);
 
             if (origItem == null)
-            {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataUpdate, id, "Metadata", false);
-                return NotFound(id);
-            }
+                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentMetadataUpdate, "Metadata", id.ToString());
 
             //Check if user has access to both BuisnessAreas
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Update, origItem.BuisnessArea, value.BuisnessArea))
-            {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataUpdate, id, "Metadata", false);
-                return Unauthorized();
-            }
+                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentMetadataUpdate, "Metadata", id.ToString());
 
             _metadataRepository.Edit(value);
 
@@ -126,16 +110,10 @@ namespace DocStoreAPI.Controllers
             MetadataEntity origItem = _metadataRepository.GetById(id, true, true);
 
             if (origItem == null)
-            {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentDelete, id, "Metadata", false);
-                return NotFound(id);
-            }
+                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentDelete, "Metadata", id.ToString());
 
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Delete, origItem.BuisnessArea))
-            {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentDelete, id, "Metadata", false);
-                return Unauthorized();
-            }
+                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentDelete, "Metadata", id.ToString());
 
             foreach (var oldVer in origItem.Versions)
             {
@@ -162,16 +140,10 @@ namespace DocStoreAPI.Controllers
             MetadataEntity origItem = _metadataRepository.GetById(id, false, false);
 
             if (origItem == null)
-            {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentArchive, id, "Document", false);
-                return NotFound(id);
-            }
+                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentArchive, "Metadata", id.ToString());
 
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Archive, origItem.BuisnessArea))
-            {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentArchive, id, "Document", false);
-                return Unauthorized();
-            }
+                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentArchive, "Metadata", id.ToString());
 
             origItem.Archive.Archive(HttpContext.User.Identity.Name);
 

@@ -202,21 +202,18 @@ namespace DocStoreAPI.Repositories
             return false;
         }
 
-        public IActionResult GateUnathorised(DocumentMetadataController bmc)
+        public IActionResult GateUnathorised(HttpContext context, AccessLogAction ala, string objectType, string objectValue)
         {
-            return bmc.Unauthorized();
+            LogUserAction(context, ala, objectValue, objectType, false);
+            _logger.LogInformation((int)ala, "Unathorised to access object '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, context.User.Identity.Name);
+            return new UnauthorizedResult();
         }
 
-        public IActionResult GateNotFound(DocumentMetadataController bmc, Object obj, AccessLogAction ala, ControllerAction ca, string buisnessArea, string objectType)
+        public IActionResult GateNotFound(HttpContext context, AccessLogAction ala, string objectType, string objectValue)
         {
-            bmc.HttpContext
-            return bmc.NotFound(obj);
+            LogUserAction(context, ala, objectValue, objectType, false);
+            _logger.LogInformation((int)ala, "Failed to find object '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, context.User.Identity.Name);
+            return new NotFoundObjectResult(objectValue);
         }
-    }
-
-    public enum ControllerAction
-    {
-        Search = 1,
-
     }
 }

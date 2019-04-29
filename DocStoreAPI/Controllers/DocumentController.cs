@@ -34,11 +34,11 @@ namespace DocStoreAPI.Controllers
         {
             var meta = _metadataRepository.GetById(id);
 
+            if (meta == null)
+                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentRead, "Document", id.ToString());
+
             if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, meta.BuisnessArea, "r"))
-            {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentRead, id, "Document", false);
-                return Unauthorized();
-            }
+                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentRead, "Document", id.ToString());
 
             var doc = await _documentRepository.GetDocumentAsync(meta);
 
@@ -55,11 +55,11 @@ namespace DocStoreAPI.Controllers
             //Posting a New document after posting the metadata
             var meta = _metadataRepository.GetById(id, true, false);
 
+            if (meta == null)
+                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentCreate, "Document", id.ToString());
+
             if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, meta.BuisnessArea, "c"))
-            {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentCreate, id, "Document", false);
-                return Unauthorized();
-            }
+                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentCreate, "Document", id.ToString());
 
             await _documentRepository.SetDocumentAsync(meta, value);
 
@@ -76,13 +76,11 @@ namespace DocStoreAPI.Controllers
             //uploading a new version of the document
             var meta = _metadataRepository.GetById(id, true, false);
 
-            if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, meta.BuisnessArea, "u"))
-            {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentUpdate, id, "Document", false);
-                return Unauthorized();
-            }
-                
+            if (meta == null)
+                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentUpdate, "Document", id.ToString());
 
+            if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, meta.BuisnessArea, "u"))
+                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentUpdate, "Document", id.ToString());
 
             meta.Versions.Add(DocumentVersionEntity.FromMetadata(meta));
 
@@ -102,14 +100,16 @@ namespace DocStoreAPI.Controllers
         [HttpDelete("{id}/Version/{verId}")]
         public async Task<IActionResult> Delete(int id, int verId)
         {
-            //Delete a Document Version, Deleteing a complete document is in the Document Metadata Controller
+            //Delete a Document Version, Deleting a complete document is in the Document Metadata Controller
             var meta = _metadataRepository.GetById(id, true, true);
 
+            var ids = string.Format("{0}:{1}", id.ToString(), verId.ToString());
+
+            if (meta == null)
+                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentVersionDelete, "DocumentVersion", ids);
+
             if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, meta.BuisnessArea, "d"))
-            {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentVersionDelete, id, "DocumentVersion", false);
-                return Unauthorized();
-            }
+                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentVersionDelete, "DocumentVersion", ids);
 
             var oldVer = meta.Versions.First(ver => ver.Version == verId);
 
