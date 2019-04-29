@@ -27,35 +27,21 @@ namespace DocStoreAPI.Controllers
             _securityRepository = securityRepository;
         }
 
-        // GET: api/DocumentMetadata
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-
         //Actual result is List<MetadataEntity>
         // GET: api/DocumentMetadata/HR
         [HttpGet("{buisnessArea}")]
         public IActionResult ListByBuisnessArea(string buisnessArea)
         {
-            if (string.IsNullOrWhiteSpace(buisnessArea))
+            if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Return, buisnessArea))
             {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataSearched, buisnessArea, "Metadata", false);
-                return NotFound(buisnessArea);
-            }
-
-            if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, buisnessArea, "r"))
-            {
-                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataSearched, buisnessArea, "Metadata", false);
+                _securityRepository.LogUserAction(HttpContext, AccessLogAction.DocumentMetadataSearched, buisnessArea, "Metadata", false);
                 return Unauthorized();
             }
                 
 
             List<MetadataEntity> metaItems = _metadataRepository.ListByBuisnessArea(buisnessArea, false, false).ToList();
 
-            _logger.Log(LogLevel.Information, "Getting Document Metadata Within BuisnessArea {0} for User {1}", buisnessArea, HttpContext.User.Identity.Name);
+            _logger.Log(LogLevel.Information, "Getting DocumentMetadata Within BuisnessArea {0} for User {1}", buisnessArea, HttpContext.User.Identity.Name);
             _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataSearched, buisnessArea, "Metadata", true);
 
             return Ok(metaItems);
@@ -68,19 +54,19 @@ namespace DocStoreAPI.Controllers
         {
             MetadataEntity item = _metadataRepository.GetById(id, false, false);
 
-            if (string.IsNullOrWhiteSpace(item.Name))
+            if (item == null)
             {
                 _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataRead, id, "Metadata", false);
                 return NotFound(id);
             }
 
-            if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, item.BuisnessArea, "r"))
+            if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Return, item.BuisnessArea))
             {
                 _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataRead, id, "Metadata", false);
                 return Unauthorized();
             }
 
-            _logger.Log(LogLevel.Information, "Document {0} Returned For {1}", item.Id, HttpContext.User.Identity.Name);
+            _logger.Log(LogLevel.Information, "DocumentMetadata {0} Returned For {1}", item.Id, HttpContext.User.Identity.Name);
             _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataRead, id, "Metadata", true);
 
             return Ok(item);
@@ -90,7 +76,7 @@ namespace DocStoreAPI.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] MetadataEntity value)
         {
-            if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, value.BuisnessArea, "c"))
+            if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Create ,value.BuisnessArea))
             {
                 _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataCreate, "NA", "Metadata", false);
                 return Unauthorized();
@@ -98,7 +84,7 @@ namespace DocStoreAPI.Controllers
 
             var valueWId =_metadataRepository.Add(value);
 
-            _logger.Log(LogLevel.Information, "Document {0} Created By {1}", valueWId.Id, HttpContext.User.Identity.Name);
+            _logger.Log(LogLevel.Information, "DocumentMetadata {0} Created By {1}", valueWId.Id, HttpContext.User.Identity.Name);
             _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataCreate, valueWId.Id, "Metadata", true);
 
             return Ok(valueWId);
@@ -110,45 +96,27 @@ namespace DocStoreAPI.Controllers
         {
             MetadataEntity origItem = _metadataRepository.GetById(id, false, false);
 
-            if (string.IsNullOrWhiteSpace(origItem.Name))
+            if (origItem == null)
             {
                 _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataUpdate, id, "Metadata", false);
                 return NotFound(id);
             }
 
-
-            // Check if the user has changed the Buisness Area
-            if (origItem.BuisnessArea == value.BuisnessArea)
+            //Check if user has access to both BuisnessAreas
+            if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Update, origItem.BuisnessArea, value.BuisnessArea))
             {
-                if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, origItem.BuisnessArea, "u"))
-                {
-                    _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataUpdate, id, "Metadata", false);
-                    return Unauthorized();
-                }
-            }
-            else
-            {
-                //Check if user has access to both BuisnessAreas
-                if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, origItem.BuisnessArea, "u"))
-                {
-                    _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataUpdate, id, "Metadata", false);
-                    return Unauthorized();
-                }
-                if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, value.BuisnessArea, "u"))
-                {
-                    _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataUpdate, id, "Metadata", false);
-                    return Unauthorized();
-                }
+                _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataUpdate, id, "Metadata", false);
+                return Unauthorized();
             }
 
             _metadataRepository.Edit(value);
 
-            _logger.Log(LogLevel.Information, "Document {0} Edited By {1}", value.Id, HttpContext.User.Identity.Name);
+            _logger.Log(LogLevel.Information, "DocumentMetadata {0} Edited By {1}", value.Id, HttpContext.User.Identity.Name);
             _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentMetadataUpdate, id, "Metadata", true);
 
             var meta = _metadataRepository.GetById(id, false, false);
 
-            return Ok(meta);                
+            return Ok(meta);
         }
 
         // DELETE: api/DocumentMetadata/5
@@ -157,13 +125,13 @@ namespace DocStoreAPI.Controllers
         {
             MetadataEntity origItem = _metadataRepository.GetById(id, true, true);
 
-            if (string.IsNullOrWhiteSpace(origItem.Name))
+            if (origItem == null)
             {
                 _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentDelete, id, "Metadata", false);
                 return NotFound(id);
             }
 
-            if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, origItem.BuisnessArea, "d"))
+            if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Delete, origItem.BuisnessArea))
             {
                 _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentDelete, id, "Metadata", false);
                 return Unauthorized();
@@ -193,13 +161,13 @@ namespace DocStoreAPI.Controllers
         {
             MetadataEntity origItem = _metadataRepository.GetById(id, false, false);
 
-            if (string.IsNullOrWhiteSpace(origItem.Name))
+            if (origItem == null)
             {
                 _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentArchive, id, "Document", false);
                 return NotFound(id);
             }
 
-            if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, origItem.BuisnessArea, "a"))
+            if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Archive, origItem.BuisnessArea))
             {
                 _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentArchive, id, "Document", false);
                 return Unauthorized();

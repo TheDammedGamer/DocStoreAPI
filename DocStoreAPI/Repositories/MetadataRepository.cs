@@ -80,7 +80,7 @@ namespace DocStoreAPI.Repositories
             if (includeOldVersions)
                 entities = entities.Include(m => m.Versions);
 
-            return entities.First();
+            return entities.SingleOrDefault();
         }
 
         public IEnumerable<MetadataEntity> List()

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
+using DocStoreAPI.Controllers;
 
 namespace DocStoreAPI.Repositories
 {
@@ -135,5 +136,87 @@ namespace DocStoreAPI.Repositories
             _context.AccessLogEntities.Add(new AccessLogEntity(user, actionId, targetId, targetType, success));
             _context.SaveChanges();
         }
+        public void LogUserAction(HttpContext context, AccessLogAction actionId, string targetId, string targetType, bool success)
+        {
+            _context.AccessLogEntities.Add(new AccessLogEntity(context.User.Identity.Name, actionId, targetId, targetType, success));
+            _context.SaveChanges();
+        }
+
+
+        public bool UserIsAuthorisedByBuisnessAreas(HttpContext context, AuthActions action, params string[] buisnessArea)
+        {
+            if (buisnessArea.Count() == 0)
+                return false;
+
+            var baes = _context.BuisnessAreas.Where(bae => buisnessArea.Contains(bae.Name)).ToList();
+
+            if (baes.Count == 0)
+                return false;
+
+            List<AccessControlEntity> aces = new List<AccessControlEntity>();
+
+            foreach (var ba in baes)
+            {
+                aces.AddRange(ba.RelevantAccessControlEntities);
+            }
+
+            switch (action)
+            {
+                case AuthActions.Create:
+                    aces = aces.Where(ace => ace.Create).ToList();
+                    break;
+                case AuthActions.Return:
+                    aces = aces.Where(ace => ace.Return).ToList();
+                    break;
+                case AuthActions.Update:
+                    aces = aces.Where(ace => ace.Update).ToList();
+                    break;
+                case AuthActions.Delete:
+                    aces = aces.Where(ace => ace.Delete).ToList();
+                    break;
+                case AuthActions.Archive:
+                    aces = aces.Where(ace => ace.Archive).ToList();
+                    break;
+            }
+
+            if (aces.Count == 0)
+                return false;
+
+            foreach (var ace in aces)
+            {
+                var grp = ace.Group;
+
+                //Valid Types
+                //https://github.com/Microsoft/referencesource/blob/master/System.IdentityModel/System/IdentityModel/Claims/AuthenticationTypes.cs
+                if (context.User.Identity.AuthenticationType == "Windows")
+                {
+                    if (context.User.IsInRole(grp.ADName))
+                        return true;
+                }
+                else
+                {
+                    if (context.User.IsInRole(grp.AzureName))
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        public IActionResult GateUnathorised(DocumentMetadataController bmc)
+        {
+            return bmc.Unauthorized();
+        }
+
+        public IActionResult GateNotFound(DocumentMetadataController bmc, Object obj, AccessLogAction ala, ControllerAction ca, string buisnessArea, string objectType)
+        {
+            bmc.HttpContext
+            return bmc.NotFound(obj);
+        }
+    }
+
+    public enum ControllerAction
+    {
+        Search = 1,
+
     }
 }
