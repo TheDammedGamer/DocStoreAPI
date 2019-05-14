@@ -51,6 +51,27 @@ namespace DocStoreAPI.Repositories
         }
 
 
+        public bool UserIsAdmin(HttpContext context)
+        {
+            if (context.User.Identity.AuthenticationType == "Windows")
+            {
+                foreach (var item in _admins.ADAdminGroupNames)
+                {
+                    if (context.User.IsInRole(item))
+                        return true;
+                }
+            }
+            else
+            {
+                foreach (var item in _admins.AZAdminGroupNames)
+                {
+                    if (context.User.IsInRole(item))
+                        return true;
+                }
+            }
+            return false;
+        }
+
         public bool UserIsAuthorisedByBuisnessAreas(HttpContext context, AuthActions action, params string[] buisnessArea)
         {
             if (buisnessArea.Count() == 0)
@@ -79,6 +100,9 @@ namespace DocStoreAPI.Repositories
                     break;
                 case AuthActions.Archive:
                     aces = aces.Where(ace => ace.Archive).ToList();
+                    break;
+                case AuthActions.Supervisor:
+                    aces = aces.Where(ace => ace.Supervisor).ToList();
                     break;
             }
 

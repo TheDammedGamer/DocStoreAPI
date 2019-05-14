@@ -12,5 +12,6 @@ namespace DocStoreAPI.Models
         Update = 3,
         Delete = 4,
         Archive = 5,
+        Supervisor = 6,
     }
 }

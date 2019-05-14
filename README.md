@@ -10,14 +10,15 @@ The application stores docuemnts within `stors` such as a file share or Azure Bl
 ## To-Do (MVP)
 - [x] Implement Move on `DocumentController`
 - [x] Implement a Security Controller(s) to Manage Groups, ACEs and Buisness Areas.
-- [ ] Add ACE state of 'Supervisor' to manage permissions
-- [ ] Inject Admin Groups via Config
-- [ ] Implement Admin or 'Supervisor' Check on Security Controller(s)
+- [x] Add ACE state of 'Supervisor' to manage permissions
+- [x] Inject Admin Groups via Config
+- [x] Implement Admin or 'Supervisor' Check on Security Controller(s)
 - [ ] Implement Metadata filtering on `DocumentMetadataController.Put` & `DocumentMetadataController.Post` to ensure generated values aren't being overwritten and document names are updated when nessacary. (Partially Completed)
 	- [x] Add User Edit Metod to limit the properties that can be edited by Put
 	- [ ] Verify Post Data and strip Generated Data
-- [ ] Update User Is authorsed by Buisness Area to support Admins
+- [x] Update User Is authorsed by Buisness Area to support Admins
 - [ ] Implement a Search by Custom Metadata Keys in `DocumentMetadataController` using `SearchByCustomMetadataKey`
+	- [ ] Use a class passed as the body to store the search Data with Queries for the Pagination etc 
 - [ ] Add a Client library.
 - [ ] Add an example WPF app.
 

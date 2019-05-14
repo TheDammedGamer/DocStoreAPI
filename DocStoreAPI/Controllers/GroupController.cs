@@ -45,7 +45,8 @@ namespace DocStoreAPI.Controllers
             }
             catch (Exception ex)
             {
-                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.GroupReturn, "GroupEntity", id.ToString());
+                string currentUser = HttpContext.User.Identity.Name;
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.GroupReturn, "GroupEntity", id.ToString());
             }
         }
 
