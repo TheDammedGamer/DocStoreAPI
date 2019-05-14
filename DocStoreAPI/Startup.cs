@@ -35,12 +35,18 @@ namespace DocStoreAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            Admins baseAdmins = new Admins();
+            Configuration.GetSection("AdminGroups").Bind(baseAdmins);
             services.AddDbContext<DocStoreContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddSingleton(typeof(StorConfig), StorConfigFactory.GetStorConfig(Configuration.GetValue<string>("StorConfigFilePath")));
+            services.AddSingleton(typeof(Admins), baseAdmins);
             services.AddScoped<MetadataRepository>();
             services.AddScoped<DocumentRepository>();
             services.AddScoped<SecurityRepository>();
+            services.AddScoped<GroupRepository>();
+            services.AddScoped<AccessRepository>();
+            services.AddScoped<BuisnessAreaRepository>();
             services.AddLogging(configure => configure.AddEventSourceLogger());
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddAuthentication(authOptions =>

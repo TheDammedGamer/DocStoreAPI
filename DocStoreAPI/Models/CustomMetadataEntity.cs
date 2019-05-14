@@ -15,5 +15,11 @@ namespace DocStoreAPI.Models
         {
 
         }
+
+        public CustomMetadataEntity(string key, string value)
+        {
+            this.Key = key;
+            this.Value = value;
+        }
     }
 }

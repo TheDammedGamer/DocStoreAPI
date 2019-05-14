@@ -17,6 +17,8 @@ namespace DocStoreAPI.Models.Stor
         void RemoveFile(string fileName);
         Task<string> GetFileHashAsync(string fileName);
         string GetFileHash(string fileName);
+        void RenameFile(string oldFileName, string newfileName);
+        Task RenameFileAsync(string oldFileName, string newfileName);
         bool TestConnection();
     }
 }

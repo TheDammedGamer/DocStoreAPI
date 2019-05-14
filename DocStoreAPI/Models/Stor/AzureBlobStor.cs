@@ -160,6 +160,39 @@ namespace DocStoreAPI.Models.Stor
                 throw new Exception(String.Format("Unable to connect to Azure Blob Storage container '{0}'", ShortName), ex);
             }
         }
+        public void RenameFile(string oldFileName, string newfileName)
+        {
+            try
+            {
+                var containerRef = GetBlobContainer();
+                var blockRef = containerRef.GetBlockBlobReference(oldFileName);
+                CloudBlockBlob blobCopy = containerRef.GetBlockBlobReference(newfileName);
+
+                var doesExist = blobCopy.ExistsAsync();
+                doesExist.RunSynchronously();
+                
+                if (!doesExist.Result)
+                {
+                    CloudBlockBlob blob = containerRef.GetBlockBlobReference(oldFileName);
+
+                    blobCopy.StartCopyAsync(blob).RunSynchronously();
+                    blob.DeleteIfExistsAsync().RunSynchronously();
+                }
+                else
+                {
+                    throw new Exception(string.Format("file already exists unable to rename From: '{0}' To: '{1}'", oldFileName, newfileName));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(String.Format("Unable to connect to Azure Blob Storage container '{0}'", ShortName), ex);
+            }
+        }
+
+        public Task RenameFileAsync(string oldFileName, string newfileName)
+        {
+            throw new NotImplementedException();
+        }
 
         public bool TestConnection()
         {
@@ -186,5 +219,7 @@ namespace DocStoreAPI.Models.Stor
                 throw new Exception(String.Format("Unable to connect to Azure Blob Storage container '{0}'", ShortName), ex);
             }
         }
+
+        
     }
 }

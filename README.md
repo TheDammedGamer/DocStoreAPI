@@ -3,20 +3,34 @@ A simple asp.net core document managment api, backed by SQL Server, AzureAd, Act
 
 At it's core DocStorAPI is a simple document management API designed to be easily intergratable with other projects that require an auditable service.
 
-## To-Do
-- [ ] Implement metadata filtering to ensure that when values which consist of the FileName are changed then the relevant filename is changed aswell.
-- [ ] Implement a Security Controller(s) to Manage Groups and Access Control Entity
-- [ ] Add a Client library
-- [ ] Add an example WPF app
+# In-Practice
+The application stores docuemnts within `stors` such as a file share or Azure Blob Storage, and then links theese documents to 
+
+
+## To-Do (MVP)
+- [x] Implement Move on `DocumentController`
+- [x] Implement a Security Controller(s) to Manage Groups, ACEs and Buisness Areas.
+- [ ] Add ACE state of 'Supervisor' to manage permissions
+- [ ] Inject Admin Groups via Config
+- [ ] Implement Admin or 'Supervisor' Check on Security Controller(s)
+- [ ] Implement Metadata filtering on `DocumentMetadataController.Put` & `DocumentMetadataController.Post` to ensure generated values aren't being overwritten and document names are updated when nessacary. (Partially Completed)
+	- [x] Add User Edit Metod to limit the properties that can be edited by Put
+	- [ ] Verify Post Data and strip Generated Data
+- [ ] Update User Is authorsed by Buisness Area to support Admins
+- [ ] Implement a Search by Custom Metadata Keys in `DocumentMetadataController` using `SearchByCustomMetadataKey`
+- [ ] Add a Client library.
+- [ ] Add an example WPF app.
 
 ## Version 2 improvements
-- Implement simple polices based upon BuisnessArea to define the `stor` used for specific documents.
-- Add Support for MySql as an alternative database
-- Add Support for Comsmos DB as an alternative database (requires .net core 3)
-- Add Support for AWS storage
-- Look into supporting other Identity providers
+- Implement Background Worker and Queue to manage archival, deletion and movement of documents instead of at Runtime.
+- Implement simple polices based upon BuisnessArea to define automatic movement policies based on Stors and BuisnessAreas.
+- Add Support for MySql as an alternative database.
+- Add Support for Comsmos DB as an alternative database (requires .net core 3).
+- Look into Support for AWS storage.
+- Look into Supporting other Identity providers.
 
-
+## Possible Version 3 Improvements
+- Support for Metadata / Security caching possible using redis or something similar.
 
 # MIT License
 

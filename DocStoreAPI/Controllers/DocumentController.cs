@@ -37,7 +37,7 @@ namespace DocStoreAPI.Controllers
             if (meta == null)
                 return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentRead, "Document", id.ToString());
 
-            if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, meta.BuisnessArea, "r"))
+            if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Return, meta.BuisnessArea))
                 return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentRead, "Document", id.ToString());
 
             var doc = await _documentRepository.GetDocumentAsync(meta);
@@ -58,7 +58,7 @@ namespace DocStoreAPI.Controllers
             if (meta == null)
                 return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentCreate, "Document", id.ToString());
 
-            if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, meta.BuisnessArea, "c"))
+            if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Create, meta.BuisnessArea))
                 return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentCreate, "Document", id.ToString());
 
             await _documentRepository.SetDocumentAsync(meta, value);
@@ -79,7 +79,7 @@ namespace DocStoreAPI.Controllers
             if (meta == null)
                 return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentUpdate, "Document", id.ToString());
 
-            if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, meta.BuisnessArea, "u"))
+            if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Update, meta.BuisnessArea))
                 return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentUpdate, "Document", id.ToString());
 
             meta.Versions.Add(DocumentVersionEntity.FromMetadata(meta));
@@ -108,10 +108,13 @@ namespace DocStoreAPI.Controllers
             if (meta == null)
                 return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentVersionDelete, "DocumentVersion", ids);
 
-            if (!_securityRepository.UserIsAuthorisedByBuisnessArea(HttpContext, meta.BuisnessArea, "d"))
+            if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Delete, meta.BuisnessArea))
                 return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentVersionDelete, "DocumentVersion", ids);
 
-            var oldVer = meta.Versions.First(ver => ver.Version == verId);
+            var oldVer = meta.Versions.FirstOrDefault(ver => ver.Version == verId);
+
+            if (oldVer.Name == null)
+                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentVersionDelete, "DocumentVersion", ids);
 
             await _documentRepository.DeleteDocumentVersionAsync(oldVer);
 

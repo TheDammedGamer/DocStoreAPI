@@ -7,31 +7,30 @@ namespace DocStoreAPI.Models
 {
     public class AccessControlEntity : EntityBase
     {
-        public GroupEntity Group { get; set; }
-        public string GroupName { get; set; }
-        public BuisnessAreaEntity BuisnessAreaEntity { get; set; }
+        public string Group { get; set; }
         public string BusinessArea { get; set; }
         public bool Create { get; set; }
         public bool Return { get; set; }
         public bool Update { get; set; }
         public bool Archive { get; set; }
         public bool Delete { get; set; }
+        public bool Supervisor { get; set; }
 
         public AccessControlEntity()
         {
 
         }
 
-        public AccessControlEntity(GroupEntity group, string businessArea, bool create, bool @return, bool update, bool archvie, bool delete)
+        public AccessControlEntity(string group, string businessArea, bool create, bool returnPerm, bool update, bool archive, bool delete, bool supervisor)
         {
-            Group = group;
-            GroupName = group.Name ?? throw new ArgumentNullException(nameof(group.Name));
+            Group = group ?? throw new ArgumentNullException(nameof(group));
             BusinessArea = businessArea ?? throw new ArgumentNullException(nameof(businessArea));
             Create = create;
-            Return = @return;
+            Return = returnPerm;
             Update = update;
-            Archive = archvie;
+            Archive = archive;
             Delete = delete;
+            Supervisor = supervisor;
         }
     }
 }

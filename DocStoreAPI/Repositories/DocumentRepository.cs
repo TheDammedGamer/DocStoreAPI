@@ -29,7 +29,6 @@ namespace DocStoreAPI.Repositories
             var stor = _config.Stors.First(s => s.ShortName == meta.StorName).GetStorFromConfig();
             var fileName = meta.GetServerFileName();
             var stream = await stor.GetFileAsync(fileName);
-            stor = null;
             return stream;
         }
         public async Task<Stream> GetDocumentByIdAsync(int id)
@@ -42,7 +41,6 @@ namespace DocStoreAPI.Repositories
             var stor = _config.Stors.First(s => s.ShortName == verEntity.StorName).GetStorFromConfig();
             var fileName = verEntity.GetServerFileName();
             var stream = await stor.GetFileAsync(fileName);
-            stor = null;
             return stream;
         }
 
@@ -66,8 +64,8 @@ namespace DocStoreAPI.Repositories
         {
             
             try {
-                var origStor = _config.Stors.First(s => s.ShortName == meta.StorName).GetStorFromConfig();
-                var newStor = _config.Stors.First(s => s.ShortName == newStorProvider).GetStorFromConfig();
+                var origStor = _config.Stors.FirstOrDefault(s => s.ShortName == meta.StorName).GetStorFromConfig();
+                var newStor = _config.Stors.FirstOrDefault(s => s.ShortName == newStorProvider).GetStorFromConfig();
                 if (String.IsNullOrWhiteSpace(origStor.ShortName))
                     throw new Exception("Unable to find old stor within config");
                 if (String.IsNullOrWhiteSpace(newStor.ShortName))
@@ -99,8 +97,8 @@ namespace DocStoreAPI.Repositories
         {
             try
             {
-                var origStor = _config.Stors.First(s => s.ShortName == verEntity.StorName).GetStorFromConfig();
-                var newStor = _config.Stors.First(s => s.ShortName == newStorProvider).GetStorFromConfig();
+                IStor origStor = _config.Stors.First(s => s.ShortName == verEntity.StorName).GetStorFromConfig();
+                IStor newStor = _config.Stors.First(s => s.ShortName == newStorProvider).GetStorFromConfig();
                 if (String.IsNullOrWhiteSpace(origStor.ShortName))
                     throw new Exception("Unable to find old stor within config");
                 if (String.IsNullOrWhiteSpace(newStor.ShortName))
@@ -128,7 +126,7 @@ namespace DocStoreAPI.Repositories
         //Deletes
         public async Task DeleteDocumentAsync(MetadataEntity meta)
         {
-            var stor = _config.Stors.First(s => s.ShortName == meta.StorName).GetStorFromConfig();
+            IStor stor = _config.Stors.First(s => s.ShortName == meta.StorName).GetStorFromConfig();
             var fileName = meta.GetServerFileName();
             await stor.RemoveFileAsync(fileName);
         }
@@ -139,9 +137,18 @@ namespace DocStoreAPI.Repositories
         }
         public async Task DeleteDocumentVersionAsync(DocumentVersionEntity verEntity)
         {
-            var stor = _config.Stors.First(s => s.ShortName == verEntity.StorName).GetStorFromConfig();
+            IStor stor = _config.Stors.First(s => s.ShortName == verEntity.StorName).GetStorFromConfig();
             var fileName = verEntity.GetServerFileName();
             await stor.RemoveFileAsync(fileName);
+        }
+
+        //Rename
+        public async Task RenameFileAsync(MetadataEntity oldFile, MetadataEntity newFile)
+        {
+            IStor stor = _config.Stors.First(s => s.ShortName == oldFile.StorName).GetStorFromConfig();
+            var oldFileName = oldFile.GetServerFileName();
+            var newFileName = newFile.GetServerFileName();
+            await stor.RenameFileAsync(oldFileName, newFileName);
         }
     }
 }

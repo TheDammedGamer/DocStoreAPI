@@ -12,134 +12,42 @@ using DocStoreAPI.Controllers;
 
 namespace DocStoreAPI.Repositories
 {
-    public class SecurityRepository
+    public class SecurityRepository : BaseRepository
     {
         private readonly DocStoreContext _context;
         private readonly ILogger _logger;
+        private readonly Admins _admins;
 
-        public SecurityRepository(ILogger<SecurityRepository> logger, DocStoreContext docStoreContext)
+        public SecurityRepository(ILogger<SecurityRepository> logger, DocStoreContext docStoreContext, Admins adminList)
         {
             _logger = logger;
             _context = docStoreContext;
+            _admins = adminList;
         }
 
-        //action could be any of c,r,u,d,a
-        public bool UserIsAuthorisedByBuisnessArea(HttpContext context, string buisnessArea, string action)
+        public GroupEntity GetGroupByName(string name)
         {
-            var aces = _context.BuisnessAreas.First(bae => bae.Name == buisnessArea).RelevantAccessControlEntities;
-            switch (action.ToLower())
-            {
-                case "c":
-                    aces = aces.Where(ace => ace.Create).ToList();
-                    break;
-                case "r":
-                    aces = aces.Where(ace => ace.Return).ToList();
-                    break;
-                case "u":
-                    aces = aces.Where(ace => ace.Update).ToList();
-                    break;
-                case "d":
-                    aces = aces.Where(ace => ace.Delete).ToList();
-                    break;
-                case "a":
-                    aces = aces.Where(ace => ace.Archive).ToList();
-                    break;
-                default:
-                    throw new ArgumentException("unknown action passed through", nameof(action));
-            }
-
-            if (aces.Count == 0)
-                return false;
-
-            foreach (var ace in aces)
-            {
-                var grp = ace.Group;
-
-                //Valid Types
-                //https://github.com/Microsoft/referencesource/blob/master/System.IdentityModel/System/IdentityModel/Claims/AuthenticationTypes.cs
-                if (context.User.Identity.AuthenticationType == "Windows")
-                {
-                    if (context.User.IsInRole(grp.ADName))
-                        return true;
-                }
-                else
-                {
-                    if (context.User.IsInRole(grp.AzureName))
-                        return true;
-                }
-            }
-            return false;
+            return _context.GroupEntities.First(g => g.Name == name);
         }
 
-        public bool UserIsAuthorisedByBuisnessAreas(HttpContext context, string buisnessArea1, string buisnessArea2, string action)
+        public List<AccessControlEntity> GetACEByBA(string name)
         {
-            var baes = _context.BuisnessAreas.Where(bae => bae.Name == buisnessArea1 || bae.Name == buisnessArea2).Include(bae => bae.RelevantAccessControlEntities);
-
-            List<AccessControlEntity> aces = new List<AccessControlEntity>();
-
-            foreach (var ba in baes)
-            {
-                aces.AddRange(ba.RelevantAccessControlEntities);
-            }
-
-            switch (action.ToLower()) //Explicit cast as lowercase
-            {
-                case "c":
-                    aces = aces.Where(ace => ace.Create).ToList();
-                    break;
-                case "r":
-                    aces = aces.Where(ace => ace.Return).ToList();
-                    break;
-                case "u":
-                    aces = aces.Where(ace => ace.Update).ToList();
-                    break;
-                case "d":
-                    aces = aces.Where(ace => ace.Delete).ToList();
-                    break;
-                case "a":
-                    aces = aces.Where(ace => ace.Archive).ToList();
-                    break;
-                default:
-                    throw new ArgumentException("unknown action passed through", nameof(action));
-            }
-
-            if (aces.Count == 0)
-                return false;
-
-            foreach (var ace in aces)
-            {
-                var grp = ace.Group;
-
-                if (context.User.Identity.AuthenticationType == "Windows")
-                {
-                    if (context.User.IsInRole(grp.ADName))
-                        return true;
-                }
-                else
-                {
-                    if (context.User.IsInRole(grp.AzureName))
-                        return true;
-                }
-            }
-            return false;
+            return _context.AcessControlEntity.Where(ace => ace.BusinessArea == name).ToList();
         }
 
 
         public void LogUserAction(string user, AccessLogAction actionId, int targetId, string targetType, bool success)
         {
             _context.AccessLogEntities.Add(new AccessLogEntity(user, actionId, targetId.ToString(), targetType, success));
-            _context.SaveChanges();
         }
 
         public void LogUserAction(string user, AccessLogAction actionId, string targetId, string targetType, bool success)
         {
             _context.AccessLogEntities.Add(new AccessLogEntity(user, actionId, targetId, targetType, success));
-            _context.SaveChanges();
         }
         public void LogUserAction(HttpContext context, AccessLogAction actionId, string targetId, string targetType, bool success)
         {
             _context.AccessLogEntities.Add(new AccessLogEntity(context.User.Identity.Name, actionId, targetId, targetType, success));
-            _context.SaveChanges();
         }
 
 
@@ -148,16 +56,11 @@ namespace DocStoreAPI.Repositories
             if (buisnessArea.Count() == 0)
                 return false;
 
-            var baes = _context.BuisnessAreas.Where(bae => buisnessArea.Contains(bae.Name)).ToList();
-
-            if (baes.Count == 0)
-                return false;
-
             List<AccessControlEntity> aces = new List<AccessControlEntity>();
 
-            foreach (var ba in baes)
+            foreach (var ba in buisnessArea)
             {
-                aces.AddRange(ba.RelevantAccessControlEntities);
+                aces.AddRange(GetACEByBA(ba));
             }
 
             switch (action)
@@ -184,8 +87,7 @@ namespace DocStoreAPI.Repositories
 
             foreach (var ace in aces)
             {
-                var grp = ace.Group;
-
+                var grp = GetGroupByName(ace.Group);
                 //Valid Types
                 //https://github.com/Microsoft/referencesource/blob/master/System.IdentityModel/System/IdentityModel/Claims/AuthenticationTypes.cs
                 if (context.User.Identity.AuthenticationType == "Windows")
@@ -199,6 +101,24 @@ namespace DocStoreAPI.Repositories
                         return true;
                 }
             }
+
+            //Check if User is Admin
+            if (context.User.Identity.AuthenticationType == "Windows")
+            {
+                foreach (var item in _admins.ADAdminGroupNames)
+                {
+                    if (context.User.IsInRole(item))
+                        return true;
+                }
+            }
+            else
+            {
+                foreach (var item in _admins.AZAdminGroupNames)
+                {
+                    if (context.User.IsInRole(item))
+                        return true;
+                }
+            }
             return false;
         }
 
@@ -206,6 +126,7 @@ namespace DocStoreAPI.Repositories
         {
             LogUserAction(context, ala, objectValue, objectType, false);
             _logger.LogInformation((int)ala, "Unathorised to access object '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, context.User.Identity.Name);
+            this.SaveChanges();
             return new UnauthorizedResult();
         }
 
@@ -213,7 +134,41 @@ namespace DocStoreAPI.Repositories
         {
             LogUserAction(context, ala, objectValue, objectType, false);
             _logger.LogInformation((int)ala, "Failed to find object '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, context.User.Identity.Name);
+            this.SaveChanges();
             return new NotFoundObjectResult(objectValue);
+        } 
+
+
+        public IActionResult GateUnathorised(string username, AccessLogAction ala, string objectType, string objectValue)
+        {
+            LogUserAction(username, ala, objectValue, objectType, false);
+            _logger.LogInformation((int)ala, "Unathorised to access object '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            this.SaveChanges();
+            return new UnauthorizedResult();
+        }
+
+        public IActionResult GateNotFound(string username, AccessLogAction ala, string objectType, string objectValue)
+        {
+            LogUserAction(username, ala, objectValue, objectType, false);
+            _logger.LogInformation((int)ala, "Failed to find object '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            this.SaveChanges();
+            return new NotFoundObjectResult(objectValue);
+        }
+
+        public IActionResult GateCannotLock(string username, string objectType, string objectValue)
+        {
+            LogUserAction(username, AccessLogAction.DocumentLocked, objectValue, objectType, false);
+            _logger.LogInformation((int)AccessLogAction.DocumentLocked, "Failed to Lock object '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            this.SaveChanges();
+            return new UnauthorizedResult();
+        }
+        public IActionResult GateCannotUnlock(string username, string objectType, string objectValue)
+        {
+
+            LogUserAction(username, AccessLogAction.DocumentUnlocked, objectValue, objectType, false);
+            _logger.LogInformation((int)AccessLogAction.DocumentUnlocked, "Failed to Unlock object '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            this.SaveChanges();
+            return new UnauthorizedResult();
         }
     }
 }

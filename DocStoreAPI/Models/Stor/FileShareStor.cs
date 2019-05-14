@@ -145,6 +145,25 @@ namespace DocStoreAPI.Models.Stor
             }
         }
 
+        public void RenameFile(string oldFileName, string newfileName)
+        {
+            var oldPath = GetFilePath(oldFileName);
+            var newPath = GetFilePath(newfileName);
+
+            File.Move(oldPath, newPath);
+        }
+
+        public async Task RenameFileAsync(string oldFileName, string newfileName)
+        {
+            await Task.Run(() =>
+            {
+                var oldPath = GetFilePath(oldFileName);
+                var newPath = GetFilePath(newfileName);
+                File.Move(oldPath, newPath);
+            });
+        }
+
+
         public bool TestConnection()
         {
             var path = GetFilePath("Test.txt");
@@ -165,5 +184,7 @@ namespace DocStoreAPI.Models.Stor
                 throw new Exception(String.Format("Unable to Connect to File stor '{0}'", ShortName), ex);
             }
         }
+
+
     }
 }

@@ -30,7 +30,7 @@ namespace DocStoreAPI.Models
         }
     }
 
-    // Document = 10xx, DocumentVersion = 11xx, DocumentMetadata = 12xx,
+    // Document = 10xx, DocumentVersion = 11xx, DocumentMetadata = 12xx, Group = 20xx
     public enum AccessLogAction
     {
         DocumentCreate = 1001,
@@ -40,7 +40,7 @@ namespace DocStoreAPI.Models
         DocumentDelete = 1005,
         DocumentMoved = 1006,
         DocumentLocked = 1007,
-        DocumentUnLocked = 1008,
+        DocumentUnlocked = 1008,
 
         DocumentVersionRead = 1101,
         DocumentVersionUpdate = 1102,
@@ -51,5 +51,11 @@ namespace DocStoreAPI.Models
         DocumentMetadataUpdate = 1202,
         DocumentMetadataSearched = 1203,
         DocumentMetadataCreate = 1204,
+
+        GroupCreate = 2001,
+        GroupReturn = 2002,
+        GroupUpdate = 2003,
+        GroupArchive = 2004,
+        GroupDelete = 2005,
     }
 }
