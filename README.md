@@ -15,7 +15,8 @@ The application stores docuemnts within `stors` such as a file share or Azure Bl
 - [x] Implement Admin or 'Supervisor' Check on Security Controller(s).
 - [ ] Implement Metadata filtering on `DocumentMetadataController.Put` & `DocumentMetadataController.Post` to ensure generated values aren't being overwritten and document names are updated when nessacary. (Partially Completed)
 	- [x] Add User Edit Metod to limit the properties that can be edited by Put.
-	- [ ] Verify Post Data and strip Generated Data.
+	- [x] Verify Post Data and strip Generated Data.
+- [ ] Redifne the Gates on the group controller and remove the exception when the object is null
 - [x] Update User Is authorised by Buisness Area to support Admins.
 - [ ] Implement a Search by Custom Metadata Keys in `DocumentMetadataController` using `SearchByCustomMetadataKey`.
 	- [ ] Use a class passed as the body to store the search Data with Queries for the Pagination etc 
@@ -32,6 +33,80 @@ The application stores docuemnts within `stors` such as a file share or Azure Bl
 
 ## Possible Version 3 Improvements
 - Support for Metadata / Security caching possible using redis or something similar.
+
+
+# Example Configs
+
+## appsettings.json
+
+- `ConnectionStrings.DefaultConnection` is for the SQL Server used for metadata storage.
+- `StorConfigFilePath` is a Path so you can host the Stor Config on a shared drive
+
+```json
+{
+  "AzureAd": {
+    "Instance": "https://login.microsoftonline.com/",
+    "Domain": "qualified.domain.name", //for instance contoso.onmicrosoft.com
+    "TenantId": "22222222-2222-2222-2222-222222222222",
+    "ClientId": "11111111-1111-1111-11111111111111111"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=Server\\Instance;Database=DocStore;User Id=SQLUSer;Password=Password;"
+  },
+  "StorConfigFilePath": "D:\\DocStore\\Config\\StorConfig.json",
+  "AdminGroups": {
+    "ADAdminGroupNames": [ "Domain Admins", "DocStore Admins" ],
+    "AZAdminGroupNames": [ "DocStore Admins" ]
+  }
+}
+```
+
+## StorConfig.json
+
+- Only use Auth if needed otherwise AD is better 
+- Don't add a trailing slash to the end of the file paths in `BasePath`
+
+``` json
+
+{
+  "Stors": [
+    {
+      "RequiresAuth": false,
+      "UserName": null,
+      "Password": null,
+      "Domain": null,
+      "BasePath": "\\\\Sevrer\\Share\\DocStore01",
+      "StorType": "FileShareStor",
+      "ShortName": "DocStore01"
+    },
+    {
+      "RequiresAuth": false,
+      "UserName": null,
+      "Password": null,
+      "Domain": null,
+      "BasePath": "\\\\Sevrer\\Share\\DocStore02",
+      "StorType": "FileShareStor",
+      "ShortName": "DocStore02"
+    },
+    {
+      "ContainerName": "DocStoreContainer",
+      "AccessKey": "YourKeyHere",
+      "AccountName": "yourAccountNameHere",
+      "StorType": "AzureBlobStor",
+      "ShortName":  "AZDefaultStor"
+    }
+  ]
+}
+
+
+```
+
 
 # MIT License
 

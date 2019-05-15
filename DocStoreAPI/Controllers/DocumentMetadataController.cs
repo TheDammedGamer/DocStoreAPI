@@ -140,9 +140,8 @@ namespace DocStoreAPI.Controllers
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Create ,value.BuisnessArea))
                 return _securityRepository.GateUnathorised(currentUser, AccessLogAction.DocumentMetadataCreate, "Metadata", "N/A");
 
-            _metadataRepository.Add(ref value);
+            _metadataRepository.AddNew(ref value, currentUser);
 
-            _metadataRepository.Touch(ref value);
             _metadataRepository.SaveChanges();
 
             _logger.Log(LogLevel.Information, "DocumentMetadata {0} Created By {1}", value.Id, currentUser);

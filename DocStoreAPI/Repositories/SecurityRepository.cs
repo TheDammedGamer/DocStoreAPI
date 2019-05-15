@@ -146,27 +146,10 @@ namespace DocStoreAPI.Repositories
             return false;
         }
 
-        public IActionResult GateUnathorised(HttpContext context, AccessLogAction ala, string objectType, string objectValue)
-        {
-            LogUserAction(context, ala, objectValue, objectType, false);
-            _logger.LogInformation((int)ala, "Unathorised to access object '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, context.User.Identity.Name);
-            this.SaveChanges();
-            return new UnauthorizedResult();
-        }
-
-        public IActionResult GateNotFound(HttpContext context, AccessLogAction ala, string objectType, string objectValue)
-        {
-            LogUserAction(context, ala, objectValue, objectType, false);
-            _logger.LogInformation((int)ala, "Failed to find object '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, context.User.Identity.Name);
-            this.SaveChanges();
-            return new NotFoundObjectResult(objectValue);
-        } 
-
-
         public IActionResult GateUnathorised(string username, AccessLogAction ala, string objectType, string objectValue)
         {
             LogUserAction(username, ala, objectValue, objectType, false);
-            _logger.LogInformation((int)ala, "Unathorised to access object '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            _logger.LogInformation((int)ala, "Unathorised to access {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
             this.SaveChanges();
             return new UnauthorizedResult();
         }
@@ -174,7 +157,7 @@ namespace DocStoreAPI.Repositories
         public IActionResult GateNotFound(string username, AccessLogAction ala, string objectType, string objectValue)
         {
             LogUserAction(username, ala, objectValue, objectType, false);
-            _logger.LogInformation((int)ala, "Failed to find object '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            _logger.LogInformation((int)ala, "Failed to find {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
             this.SaveChanges();
             return new NotFoundObjectResult(objectValue);
         }
@@ -182,7 +165,7 @@ namespace DocStoreAPI.Repositories
         public IActionResult GateCannotLock(string username, string objectType, string objectValue)
         {
             LogUserAction(username, AccessLogAction.DocumentLocked, objectValue, objectType, false);
-            _logger.LogInformation((int)AccessLogAction.DocumentLocked, "Failed to Lock object '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            _logger.LogInformation((int)AccessLogAction.DocumentLocked, "Failed to lock {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
             this.SaveChanges();
             return new UnauthorizedResult();
         }
@@ -190,9 +173,26 @@ namespace DocStoreAPI.Repositories
         {
 
             LogUserAction(username, AccessLogAction.DocumentUnlocked, objectValue, objectType, false);
-            _logger.LogInformation((int)AccessLogAction.DocumentUnlocked, "Failed to Unlock object '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            _logger.LogInformation((int)AccessLogAction.DocumentUnlocked, "Failed to unlock {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
             this.SaveChanges();
             return new UnauthorizedResult();
+        }
+
+        public IActionResult GateDocumentLockedByAnotherUser(string username, string objectType, string objectValue)
+        {
+            LogUserAction(username, AccessLogAction.DocumentUpdate, objectValue, objectType, false);
+            _logger.LogInformation((int)AccessLogAction.DocumentUpdate, "Failed to update {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            this.SaveChanges();
+
+
+            var res = new ContentResult
+            {
+                StatusCode = 409,
+                ContentType = "text/plain",
+                Content = "Document is Locked by another User"
+            };
+
+            return res;
         }
     }
 }

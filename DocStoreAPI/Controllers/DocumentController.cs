@@ -32,18 +32,20 @@ namespace DocStoreAPI.Controllers
         [HttpGet("{id}", Name = "Get")]
         public async Task<IActionResult> Get(int id)
         {
+            var currentUser = HttpContext.User.Identity.Name;
+
             var meta = _metadataRepository.GetById(id);
 
             if (meta == null)
-                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentRead, "Document", id.ToString());
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.DocumentRead, "Document", id.ToString());
 
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Return, meta.BuisnessArea))
-                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentRead, "Document", id.ToString());
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.DocumentRead, "Document", id.ToString());
 
             var doc = await _documentRepository.GetDocumentAsync(meta);
 
             _logger.Log(LogLevel.Information, "Downloading Document {0} for User {1}", meta.Id, HttpContext.User.Identity.Name);
-            _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentRead, id, "Document", true);
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentRead, id, "Document", true);
 
             return Ok(doc);
         }
@@ -52,19 +54,21 @@ namespace DocStoreAPI.Controllers
         [HttpPost("{id}")]
         public async Task<IActionResult> Post(int id, [FromBody] Stream value)
         {
+            var currentUser = HttpContext.User.Identity.Name;
+
             //Posting a New document after posting the metadata
             var meta = _metadataRepository.GetById(id, true, false);
 
             if (meta == null)
-                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentCreate, "Document", id.ToString());
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.DocumentCreate, "Document", id.ToString());
 
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Create, meta.BuisnessArea))
-                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentCreate, "Document", id.ToString());
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.DocumentCreate, "Document", id.ToString());
 
             await _documentRepository.SetDocumentAsync(meta, value);
 
             _logger.Log(LogLevel.Information, "Uploaded New Document {0} for User {1}", meta.Id, HttpContext.User.Identity.Name);
-            _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentCreate, id, "Document", true);
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentCreate, id, "Document", true);
 
             return Ok();
         }
@@ -73,14 +77,19 @@ namespace DocStoreAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] Stream value)
         {
+            var currentUser = HttpContext.User.Identity.Name;
+
             //uploading a new version of the document
             var meta = _metadataRepository.GetById(id, true, false);
 
             if (meta == null)
-                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentUpdate, "Document", id.ToString());
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.DocumentUpdate, "Document", id.ToString());
 
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Update, meta.BuisnessArea))
-                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentUpdate, "Document", id.ToString());
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.DocumentUpdate, "Document", id.ToString());
+
+            if (meta.Locked.Is && meta.Locked.By != currentUser)
+                return _securityRepository.GateDocumentLockedByAnotherUser(currentUser, "Document", id.ToString());
 
             meta.Versions.Add(DocumentVersionEntity.FromMetadata(meta));
 
@@ -89,9 +98,10 @@ namespace DocStoreAPI.Controllers
             await _documentRepository.SetDocumentAsync(meta, value);
 
             _logger.Log(LogLevel.Information, "Uploaded New Document Version {0} for User {1}", meta.Id, HttpContext.User.Identity.Name);
-            _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentUpdate, id, "Document", true);
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentUpdate, id, "Document", true);
 
             _metadataRepository.Edit(meta);
+            _metadataRepository.SaveChanges();
 
             return Ok();
         }
@@ -100,21 +110,23 @@ namespace DocStoreAPI.Controllers
         [HttpDelete("{id}/Version/{verId}")]
         public async Task<IActionResult> Delete(int id, int verId)
         {
+            var currentUser = HttpContext.User.Identity.Name;
+
             //Delete a Document Version, Deleting a complete document is in the Document Metadata Controller
             var meta = _metadataRepository.GetById(id, true, true);
 
             var ids = string.Format("{0}:{1}", id.ToString(), verId.ToString());
 
             if (meta == null)
-                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentVersionDelete, "DocumentVersion", ids);
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.DocumentVersionDelete, "DocumentVersion", ids);
 
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Delete, meta.BuisnessArea))
-                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.DocumentVersionDelete, "DocumentVersion", ids);
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.DocumentVersionDelete, "DocumentVersion", ids);
 
             var oldVer = meta.Versions.FirstOrDefault(ver => ver.Version == verId);
 
             if (oldVer.Name == null)
-                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.DocumentVersionDelete, "DocumentVersion", ids);
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.DocumentVersionDelete, "DocumentVersion", ids);
 
             await _documentRepository.DeleteDocumentVersionAsync(oldVer);
 
@@ -123,7 +135,9 @@ namespace DocStoreAPI.Controllers
             _logger.Log(LogLevel.Information, "Deleteing Document {0} Version {1} for User {2}", meta.Id, oldVer.Version, HttpContext.User.Identity.Name);
 
             _metadataRepository.DeleteVersion(oldVer);
-            _securityRepository.LogUserAction(HttpContext.User.Identity.Name, AccessLogAction.DocumentVersionDelete, id, "DocumentVersion", true);
+            _metadataRepository.SaveChanges();
+
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentVersionDelete, id, "DocumentVersion", true);
 
             return Ok();
         }

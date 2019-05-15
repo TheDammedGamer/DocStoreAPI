@@ -46,7 +46,7 @@ namespace DocStoreAPI.Repositories
         {
             var entity = _context.AcessControlEntity.FirstOrDefault(g => g.Id == id);
 
-            if (string.IsNullOrWhiteSpace(entity.BusinessArea) || string.IsNullOrWhiteSpace(entity.GroupName))
+            if (string.IsNullOrWhiteSpace(entity.BusinessArea) || string.IsNullOrWhiteSpace(entity.Group))
                 throw new Exception("Unable to Find Dcoument With Specified ID");
 
             return entity;

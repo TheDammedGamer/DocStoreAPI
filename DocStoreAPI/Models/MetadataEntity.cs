@@ -22,10 +22,7 @@ namespace DocStoreAPI.Models
         [Required]
         public string BuisnessArea { get; set; }
 
-        public int BuisnessAreaEntityID { get; set; }
-        public BuisnessAreaEntity BuisnessAreaEntity { get; set; }
-
-        public List<CustomMetadataEntity> CustomMetadata { get; set; }
+        public List<BuisnessMetadata> BuisnessMetadata { get; set; }
         public List<DocumentVersionEntity> Versions { get; set; }
 
         [Required]
@@ -51,7 +48,7 @@ namespace DocStoreAPI.Models
             this.Extension = extension;
             this.BuisnessArea = buisnessArea;
             this.StorName = storName;
-            this.CustomMetadata = new List<CustomMetadataEntity>();
+            this.BuisnessMetadata = new List<BuisnessMetadata>();
             this.Versions = new List<DocumentVersionEntity>();
             this.Locked = new LockState();
             this.Archive = new ArchiveState();

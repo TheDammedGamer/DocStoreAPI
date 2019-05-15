@@ -22,4 +22,22 @@ namespace DocStoreAPI.Models
             this.Value = value;
         }
     }
+
+    public class BuisnessMetadata : EntityBase
+    {
+        public int DocumentId { get; internal set; }
+        public string Key { get; internal set; }
+        public string Value { get; set; }
+
+        public BuisnessMetadata()
+        {
+
+        }
+
+        public BuisnessMetadata(string key, string value)
+        {
+            this.Key = key;
+            this.Value = value;
+        }
+    }
 }

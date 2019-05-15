@@ -14,6 +14,7 @@ namespace DocStoreAPI.Models
         public DbSet<GroupEntity> GroupEntities { get; set; }
         public DbSet<MetadataEntity> MetadataEntities { get; set; }
         public DbSet<CustomMetadataEntity> CustomMetadataEntities { get; set; }
+        public DbSet<BuisnessMetadata> BuisnessMetadata { get; set; }
         public DbSet<DocumentVersionEntity> DocumentVersions { get; set; }
         public DbSet<AccessLogEntity> AccessLogEntities { get; set; }
         public DbSet<BuisnessAreaEntity> BuisnessAreas { get; set; }
@@ -59,16 +60,10 @@ namespace DocStoreAPI.Models
                 .OwnsOne(p => p.Created);
             modelBuilder.Entity<MetadataEntity>()
                 .OwnsOne(p => p.LastUpdate);
-            modelBuilder.Entity<MetadataEntity>()
-                .HasOne(me => me.BuisnessAreaEntity)
-                .WithMany()
-                .HasForeignKey(me => me.BuisnessAreaEntityID)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.ClientSetNull);
 
             modelBuilder.Entity<MetadataEntity>()
-                .HasMany<CustomMetadataEntity>(p => p.CustomMetadata)
-                .WithOne(e => e.Document)
+                .HasMany<BuisnessMetadata>(p => p.BuisnessMetadata)
+                .WithOne()
                 .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<MetadataEntity>()
                 .HasMany<DocumentVersionEntity>(p => p.Versions)
@@ -99,7 +94,7 @@ namespace DocStoreAPI.Models
                 .Property(ace => ace.Id)
                 .UseSqlServerIdentityColumn();
             modelBuilder.Entity<AccessControlEntity>()
-                .Property(ace => ace.GroupName)
+                .Property(ace => ace.Group)
                 .HasMaxLength(20)
                 .IsRequired()
                 .IsUnicode(false);
@@ -108,9 +103,6 @@ namespace DocStoreAPI.Models
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .IsRequired();
-            modelBuilder.Entity<AccessControlEntity>()
-                .HasOne(ace => ace.Group)
-                .WithMany(ge => ge.RelevantACEs);
 
             modelBuilder.Entity<GroupEntity>()
                 .HasKey(ge => ge.Id)
@@ -126,10 +118,6 @@ namespace DocStoreAPI.Models
                 .Property(ge => ge.Name)
                 .IsRequired()
                 .HasMaxLength(20);
-            modelBuilder.Entity<GroupEntity>()
-                .HasMany(ge => ge.RelevantACEs)
-                .WithOne(ace => ace.Group);
-
 
             modelBuilder.Entity<DocumentVersionEntity>()
                 .HasKey(dve => dve.Id)
@@ -154,12 +142,6 @@ namespace DocStoreAPI.Models
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .IsRequired();
-            modelBuilder.Entity<BuisnessAreaEntity>()
-                .HasMany(bae => bae.RelevantAccessControlEntities)
-                .WithOne(ace => ace.BuisnessAreaEntity)
-                .OnDelete(DeleteBehavior.Cascade);
-
-
         }
 
         public void RejectChanges()

@@ -1,0 +1,29 @@
+{
+  "Stors": [
+    {
+      "RequiresAuth": false,
+      "UserName": null,
+      "Password": null,
+      "Domain": null,
+      "BasePath": "\\\\srv2016\\Share01\\DocStore01",
+      "StorType": "FileShareStor",
+      "ShortName": "DocStore01"
+    },
+    {
+      "RequiresAuth": false,
+      "UserName": null,
+      "Password": null,
+      "Domain": null,
+      "BasePath": "\\\\srv2016\\Share01\\DocStore02",
+      "StorType": "FileShareStor",
+      "ShortName": "DocStore02"
+    },
+    {
+      "ContainerName": "DocStoreContainer",
+      "AccessKey": "YourKeyHere",
+      "AccountName": "yourAccountNameHere",
+      "StorType": "AzureBlobStor",
+      "ShortName":  "AZDefaultStor"
+    }
+  ]
+}

@@ -7,8 +7,8 @@ namespace DocStoreAPI.Models
 {
     public class UpdateState
     {
-        public string By { get; protected set; }
-        public DateTime At { get; protected set; }
+        public string By { get; internal set; }
+        public DateTime At { get; internal set; }
 
         public UpdateState()
         {
@@ -24,6 +24,15 @@ namespace DocStoreAPI.Models
         {
             this.By = userName;
             this.At = DateTime.UtcNow;
+        }
+    }
+
+    public static class UpdateStateExtensions
+    {
+        public static void ServerUpdate(this UpdateState state, string user, DateTime date)
+        {
+            state.At = date;
+            state.By = user;
         }
     }
 }

@@ -27,14 +27,13 @@ namespace DocStoreAPI.Repositories
             _securityRepository = securityRepository;
         }
 
+        
+
         public void Add(ref MetadataEntity entity)
         {
             _context.MetadataEntities.Add(entity);
 
             this.SaveChanges();
-
-            //return entity;
-            //don't need to return the entity as it will pass the pk back to the original entity
         }
 
         public void Delete(MetadataEntity entity)
@@ -85,14 +84,14 @@ namespace DocStoreAPI.Repositories
             if (includeArchive)
             {
                 return _context.MetadataEntities
-                .Include(m => m.CustomMetadata)
+                .Include(m => m.BuisnessMetadata)
                 .AsEnumerable();
             }
             else
             {
                 return _context.MetadataEntities
                 .Where(meta => !meta.Archive.Is)
-                .Include(m => m.CustomMetadata)
+                .Include(m => m.BuisnessMetadata)
                 .AsEnumerable();
             }
         }
@@ -105,7 +104,7 @@ namespace DocStoreAPI.Repositories
             if (!includeArchive)
                 entities = entities.Where(m => !m.Archive.Is);
 
-            entities = entities.Include(m => m.CustomMetadata);
+            entities = entities.Include(m => m.BuisnessMetadata);
             if (includeOldVersions)
                 entities = entities.Include(m => m.Versions);
 
@@ -120,7 +119,7 @@ namespace DocStoreAPI.Repositories
             if (!includeArchive)
                 entities = entities.Where(m => !m.Archive.Is);
 
-            entities = entities.Include(m => m.CustomMetadata);
+            entities = entities.Include(m => m.BuisnessMetadata);
             if (includeOldVersions)
                 entities = entities.Include(m => m.Versions);
 
@@ -145,7 +144,7 @@ namespace DocStoreAPI.Repositories
             if (!includeArchive)
                 entities = entities.Where(m => !m.Archive.Is);
 
-            entities = entities.Include(m => m.CustomMetadata);
+            entities = entities.Include(m => m.BuisnessMetadata);
             if (includeOldVersions)
                 entities = entities.Include(m => m.Versions);
 
@@ -155,42 +154,40 @@ namespace DocStoreAPI.Repositories
         public IEnumerable<MetadataEntity> SearchByCustomMetadataKey(string key, string value)
         {
             return _context.MetadataEntities.Where(meta =>
-                meta.CustomMetadata
+                meta.BuisnessMetadata
                     .Any(cm => cm.Key == key && cm.Value == value) && !meta.Archive.Is)
-                .Include(m => m.CustomMetadata)
+                .Include(m => m.BuisnessMetadata)
                 .AsEnumerable();
         }
 
+        //TODO: Sort this shit out to use BuisnessMetadata instead of CustomMetadata
         public IEnumerable<MetadataEntity> SearchByCustomMetadataKeys(List<string> keys, List<string> values)
         {
             if (keys.Count() != values.Count())
                 throw new ArgumentException("arguments are not equal");
 
-            IQueryable<CustomMetadataEntity> query = _context.CustomMetadataEntities.Where(cm => cm.Document != null);
+            IQueryable<BuisnessMetadata> query1 = _context.BuisnessMetadata.Where(bm => string.IsNullOrWhiteSpace(bm.Key));
 
-            query = query.Include(cm => cm.Document).ThenInclude(me => me.CustomMetadata);
+            List<BuisnessMetadata> query1Results = new List<BuisnessMetadata>();
+            List<BuisnessMetadata> query2Results = new List<BuisnessMetadata>();
 
-            query = query.Include(cm => cm.Document).ThenInclude(me => me.Archive);
-
-            query = query.Where(cm => !cm.Document.Archive.Is);
-
-            var res = query.Where(cm => keys.Contains(cm.Key)).ToList();
-
-            List<CustomMetadataEntity> queryResults = new List<CustomMetadataEntity>();
+            query1Results = query1.Where(bm => keys.Contains(bm.Key)).ToList();
 
             for (int i = 0; i < keys.Count(); i++)
             {
-                queryResults.AddRange(res.Where(cm => cm.Key == keys[i] && cm.Value == values[i]).ToList());
+                query2Results.AddRange(query1Results.Where(bm => bm.Key == keys[i] && bm.Value == values[i]).ToList());
             }
 
-            List<MetadataEntity> results = new List<MetadataEntity>();
+            List<MetadataEntity> metaResults = new List<MetadataEntity>();
 
-            foreach (var item in queryResults)
+            foreach (var item in query2Results)
             {
-                results.Add(item.Document);
+                var metaItem = _context.MetadataEntities.FirstOrDefault(me => me.Id == item.DocumentId);
+                if (!string.IsNullOrEmpty(metaItem.Name))
+                    metaResults.Add(metaItem);
             }
 
-            return results;
+            return metaResults;
         }
 
         public bool TryLockDocument(ref MetadataEntity entity, HttpContext context, TimeSpan? duration = null)
@@ -209,6 +206,63 @@ namespace DocStoreAPI.Repositories
             return success;
         }
 
+        public void AddNew(ref MetadataEntity entity, string user)
+        {
+            var timenow = DateTime.UtcNow;
+
+            foreach (PropertyInfo property in entity.GetType().GetProperties())
+            {
+                switch (property.Name)
+                {
+                    case "Versions":
+                        entity.Versions = new List<DocumentVersionEntity>();
+                        break;
+                    case "LastViewed":
+                        entity.LastViewed = timenow;
+                        break;
+                    case "LastUpdate":
+                        entity.LastUpdate.ServerUpdate(user, timenow);
+                        break;
+                    case "Created":
+                        entity.Created.ServerUpdate(user, timenow);
+                        break;
+                    case "Archive":
+                        entity.Archive = new ArchiveState();
+                        break;
+                    case "MD5Hash":
+                        entity.MD5Hash = string.Empty;
+                        break;
+                    case "Version":
+                        entity.Version = 1;
+                        break;
+                    case "Name":
+                        if (string.IsNullOrWhiteSpace(entity.Name))
+                            throw new ArgumentNullException("Name");
+                        break;
+                    case "StorName":
+                        if (string.IsNullOrWhiteSpace(entity.StorName))
+                            throw new ArgumentNullException("StorName");
+                        break;
+                    case "Extension":
+                        if (string.IsNullOrWhiteSpace(entity.Extension))
+                            throw new ArgumentNullException("Extension");
+                        break;
+                    case "BuisnessArea":
+                        if (string.IsNullOrWhiteSpace(entity.BuisnessArea))
+                            throw new ArgumentNullException("BuisnessArea");
+                        break;
+                    case "Id":
+                        if (property != null)
+                            throw new ArgumentException("Id can not be set on client", "Id");
+                        break;
+                    default:
+                        //not too fussed about the rest of the properties as theese are designed to be set by user.
+                        break;
+                }
+            }
+            _context.MetadataEntities.Add(entity);
+        }
+
         public MetadataEntity UserEdit(ref MetadataEntity entityOriginal, MetadataEntity entity, HttpContext context)
         {
             bool rename = false;
@@ -222,9 +276,7 @@ namespace DocStoreAPI.Repositories
 
                 if (origValue != newValue)
                 {
-                    
-
-                    switch(property.Name)
+                    switch (property.Name)
                     {
                         case "Name":
                             changed = true;
@@ -246,9 +298,9 @@ namespace DocStoreAPI.Repositories
                             baChange = true;
                             entityOriginal.BuisnessArea = entity.BuisnessArea;
                             break;
-                        case "CustomMetadata":
+                        case "BuisnessMetadata":
                             changed = true;
-                            entityOriginal.CustomMetadata = entity.CustomMetadata;
+                            entityOriginal.BuisnessMetadata = entity.BuisnessMetadata;
                             break;
                         default:
                             throw new Exception("Unable to Change this Property via this API Call");

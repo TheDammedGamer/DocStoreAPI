@@ -26,8 +26,10 @@ namespace DocStoreAPI.Controllers
         [HttpGet]
         public IActionResult Get()
         {
+            var currentUser = HttpContext.User.Identity.Name;
+
             if (!_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.BAList, _objectType, "NA");
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BAList, _objectType, "NA");
 
             var buisnessAreas = _buisnessAreaRepository.List();
 
@@ -38,13 +40,15 @@ namespace DocStoreAPI.Controllers
         [HttpGet("{id}", Name = "Get")]
         public IActionResult Get(int id)
         {
+            var currentUser = HttpContext.User.Identity.Name;
+
             var entity = _buisnessAreaRepository.GetById(id);
 
             if (String.IsNullOrWhiteSpace(entity.Name))
-                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.BAReturn, _objectType, id.ToString());
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.BAReturn, _objectType, id.ToString());
 
             if (!_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.BAReturn, _objectType, id.ToString());
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BAReturn, _objectType, id.ToString());
 
             return Ok(entity);
         }
@@ -53,8 +57,10 @@ namespace DocStoreAPI.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] BuisnessAreaEntity value)
         {
+            var currentUser = HttpContext.User.Identity.Name;
+
             if (!_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.BACreate, _objectType, "NA");
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BACreate, _objectType, "NA");
 
             _buisnessAreaRepository.Add(value);
             _buisnessAreaRepository.SaveChanges();
@@ -66,13 +72,15 @@ namespace DocStoreAPI.Controllers
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] BuisnessAreaEntity value)
         {
+            var currentUser = HttpContext.User.Identity.Name;
+
             var entity = _buisnessAreaRepository.GetById(id);
 
             if (String.IsNullOrWhiteSpace(entity.Name))
-                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.BAUpdate, _objectType, id.ToString());
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.BAUpdate, _objectType, id.ToString());
 
             if (!_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.BAUpdate, _objectType, id.ToString());
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BAUpdate, _objectType, id.ToString());
 
             _buisnessAreaRepository.Edit(value);
             _buisnessAreaRepository.SaveChanges();
@@ -84,13 +92,15 @@ namespace DocStoreAPI.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
+            var currentUser = HttpContext.User.Identity.Name;
+
             var entity = _buisnessAreaRepository.GetById(id);
 
             if (String.IsNullOrWhiteSpace(entity.Name))
-                return _securityRepository.GateNotFound(HttpContext, AccessLogAction.BADelete, _objectType, id.ToString());
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.BADelete, _objectType, id.ToString());
 
             if (!_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(HttpContext, AccessLogAction.BADelete, _objectType, id.ToString());
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BADelete, _objectType, id.ToString());
 
             _buisnessAreaRepository.DeleteById(id);
             _buisnessAreaRepository.SaveChanges();

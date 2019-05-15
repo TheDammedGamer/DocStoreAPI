@@ -18,19 +18,26 @@ namespace DocStoreAPI.Controllers
     {
         private readonly GroupRepository _groupRepository;
         private readonly SecurityRepository _securityRepository;
+        private const string _object = "Group";
+
         public GroupController(GroupRepository groupRepository, SecurityRepository securityRepository)
         {
             _groupRepository = groupRepository;
             _securityRepository = securityRepository;
         }
 
+        // returns IEnumerable<GroupEntity>
         // GET: api/Group
         [HttpGet]
-        public IEnumerable<GroupEntity> Get()
+        public IActionResult Get()
         {
+            var currentUser = HttpContext.User.Identity.Name;
+            if (_securityRepository.UserIsAdmin(HttpContext))
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.GroupList, _object, "NA");
+
             var groups = _groupRepository.List();
 
-            return groups;
+            return Ok(groups);
         }
 
         // GET: api/Group/5
@@ -46,7 +53,7 @@ namespace DocStoreAPI.Controllers
             catch (Exception ex)
             {
                 string currentUser = HttpContext.User.Identity.Name;
-                return _securityRepository.GateNotFound(currentUser, AccessLogAction.GroupReturn, "GroupEntity", id.ToString());
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.GroupReturn, _object, id.ToString());
             }
         }
 
@@ -54,6 +61,10 @@ namespace DocStoreAPI.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] GroupEntity value)
         {
+            var currentUser = HttpContext.User.Identity.Name;
+            if (_securityRepository.UserIsAdmin(HttpContext))
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.GroupCreate, _object, "NA");
+
             _groupRepository.Add(value);
             _groupRepository.SaveChanges();
 
@@ -64,6 +75,10 @@ namespace DocStoreAPI.Controllers
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] GroupEntity value)
         {
+            var currentUser = HttpContext.User.Identity.Name;
+            if (_securityRepository.UserIsAdmin(HttpContext))
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.GroupUpdate, _object, "NA");
+
             _groupRepository.Edit(value);
             _groupRepository.SaveChanges();
 
@@ -74,6 +89,10 @@ namespace DocStoreAPI.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
+            var currentUser = HttpContext.User.Identity.Name;
+            if (_securityRepository.UserIsAdmin(HttpContext))
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.GroupDelete, _object, "NA");
+
             _groupRepository.DeleteById(id);
             _groupRepository.SaveChanges();
 

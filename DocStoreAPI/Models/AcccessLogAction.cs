@@ -32,6 +32,7 @@ namespace DocStoreAPI.Models
         GroupUpdate = 2003,
         GroupArchive = 2004,
         GroupDelete = 2005,
+        GroupList = 2006,
 
         ACECreate = 3001,
         ACEReturn = 3002,
