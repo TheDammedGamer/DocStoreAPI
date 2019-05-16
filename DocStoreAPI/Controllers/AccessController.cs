@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using DocStoreAPI.Models;
 using DocStoreAPI.Repositories;
+using Microsoft.Extensions.Primitives;
 
 namespace DocStoreAPI.Controllers
 {
@@ -16,21 +17,30 @@ namespace DocStoreAPI.Controllers
 
         private readonly AccessRepository _accessRepository;
         private readonly SecurityRepository _securityRepository;
+        private const string _object = "AccessControlEntity";
         public AccessController(AccessRepository groupRepository, SecurityRepository securityRepository)
         {
             _accessRepository = groupRepository;
             _securityRepository = securityRepository;
         }
-        // GET: api/Access
+
+        // GET: api/Access?page=1&perPage=30
         [HttpGet]
-        public IActionResult Get()
+        public IActionResult Get([FromQuery]int page = 0, [FromQuery]int perPage = 25)
         {
             string currentUser = HttpContext.User.Identity.Name;
 
             if (!_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACEList, "AccessControlEntity", string.Empty);
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACEList, _object, string.Empty);
 
-            var entities = _accessRepository.List();
+            int pageCount = 0;
+
+            var entities = _accessRepository.ListP(out pageCount, perPage, page);
+
+            if (entities.Count() == 0)
+                _securityRepository.GateNotFound(currentUser, AccessLogAction.ACEList, _object, string.Empty);
+
+            HttpContext.Response.Headers.Add(new KeyValuePair<string, StringValues>("TotalPages", pageCount.ToString()));
 
             return Ok(entities);
         }
@@ -44,10 +54,10 @@ namespace DocStoreAPI.Controllers
             var result = _accessRepository.GetById(id);
 
             if (String.IsNullOrWhiteSpace(result.BusinessArea) || String.IsNullOrWhiteSpace(result.Group))
-                return _securityRepository.GateNotFound(currentUser, AccessLogAction.ACEReturn, "AccessControlEntity", id.ToString());
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.ACEReturn, _object, id.ToString());
 
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Supervisor, result.BusinessArea))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACEReturn, "AccessControlEntity", id.ToString());
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACEReturn, _object, id.ToString());
 
             return Ok(result);
         }
@@ -59,7 +69,7 @@ namespace DocStoreAPI.Controllers
             string currentUser = HttpContext.User.Identity.Name;
 
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Supervisor, value.BusinessArea))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACECreate, "AccessControlEntity", "NA");
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACECreate, _object, string.Empty);
 
             _accessRepository.Add(value);
             _accessRepository.SaveChanges();
@@ -76,10 +86,10 @@ namespace DocStoreAPI.Controllers
             var result = _accessRepository.GetById(id);
 
             if (String.IsNullOrWhiteSpace(result.BusinessArea) || String.IsNullOrWhiteSpace(result.Group))
-                return _securityRepository.GateNotFound(currentUser, AccessLogAction.ACEUpdate, "AccessControlEntity", id.ToString());
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.ACEUpdate, _object, id.ToString());
 
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Supervisor, result.BusinessArea))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACEUpdate, "AccessControlEntity", id.ToString());
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACEUpdate, _object, id.ToString());
 
             _accessRepository.Edit(value);
             _accessRepository.SaveChanges();
@@ -96,10 +106,11 @@ namespace DocStoreAPI.Controllers
             var entity = _accessRepository.GetById(id);
 
             if (String.IsNullOrWhiteSpace(entity.BusinessArea) || String.IsNullOrWhiteSpace(entity.Group))
-                return _securityRepository.GateNotFound(currentUser, AccessLogAction.ACEDelete, "AccessControlEntity", id.ToString());
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.ACEDelete, _object, id.ToString());
 
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Supervisor, entity.BusinessArea))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACEDelete, "AccessControlEntity", entity.Id.ToString());
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACEDelete, _object, entity.Id.ToString());
+
             _accessRepository.DeleteById(id);
             _accessRepository.SaveChanges();
 

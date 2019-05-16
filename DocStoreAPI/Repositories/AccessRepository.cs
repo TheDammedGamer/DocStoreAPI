@@ -32,8 +32,8 @@ namespace DocStoreAPI.Repositories
 
         public void DeleteById(int id)
         {
-            var entity = this.GetById(id);
-            this.Delete(entity);
+            var entity = GetById(id);
+            Delete(entity);
         }
 
         public void Edit(AccessControlEntity entity)
@@ -44,12 +44,7 @@ namespace DocStoreAPI.Repositories
 
         public AccessControlEntity GetById(int id)
         {
-            var entity = _context.AcessControlEntity.FirstOrDefault(g => g.Id == id);
-
-            if (string.IsNullOrWhiteSpace(entity.BusinessArea) || string.IsNullOrWhiteSpace(entity.Group))
-                throw new Exception("Unable to Find Dcoument With Specified ID");
-
-            return entity;
+            return _context.AcessControlEntity.FirstOrDefault(g => g.Id == id);
         }
 
         public IEnumerable<AccessControlEntity> List()
@@ -61,6 +56,23 @@ namespace DocStoreAPI.Repositories
         {
             return _context.AcessControlEntity.Where(predicate).AsEnumerable();
         }
+
+        public IEnumerable<AccessControlEntity> ListP(out int totalPages, int perPage, int page)
+        {
+            int totalRecords = _context.AcessControlEntity.Count();
+
+            totalPages = 0;
+            if (totalRecords > 0)
+                totalPages = (((totalRecords - 1) / perPage) + 1);
+            IEnumerable<AccessControlEntity> entities;
+            if (page == 0)
+                entities = _context.AcessControlEntity.Take(perPage).AsEnumerable();
+            else
+                entities = _context.AcessControlEntity.Skip(page * perPage).Take(perPage).AsEnumerable();
+
+            return entities;
+        }
+
     }
 }
 

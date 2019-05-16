@@ -25,12 +25,12 @@ namespace DocStoreAPI.Repositories
             _admins = adminList;
         }
 
-        public GroupEntity GetGroupByName(string name)
+        private GroupEntity GetGroupByName(string name)
         {
             return _context.GroupEntities.First(g => g.Name == name);
         }
 
-        public List<AccessControlEntity> GetACEByBA(string name)
+        private List<AccessControlEntity> GetACEByBA(string name)
         {
             return _context.AcessControlEntity.Where(ace => ace.BusinessArea == name).ToList();
         }
@@ -150,7 +150,7 @@ namespace DocStoreAPI.Repositories
         {
             LogUserAction(username, ala, objectValue, objectType, false);
             _logger.LogInformation((int)ala, "Unathorised to access {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
-            this.SaveChanges();
+            SaveChanges();
             return new UnauthorizedResult();
         }
 
@@ -158,7 +158,7 @@ namespace DocStoreAPI.Repositories
         {
             LogUserAction(username, ala, objectValue, objectType, false);
             _logger.LogInformation((int)ala, "Failed to find {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
-            this.SaveChanges();
+            SaveChanges();
             return new NotFoundObjectResult(objectValue);
         }
 
@@ -166,15 +166,14 @@ namespace DocStoreAPI.Repositories
         {
             LogUserAction(username, AccessLogAction.DocumentLocked, objectValue, objectType, false);
             _logger.LogInformation((int)AccessLogAction.DocumentLocked, "Failed to lock {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
-            this.SaveChanges();
+            SaveChanges();
             return new UnauthorizedResult();
         }
         public IActionResult GateCannotUnlock(string username, string objectType, string objectValue)
         {
-
             LogUserAction(username, AccessLogAction.DocumentUnlocked, objectValue, objectType, false);
             _logger.LogInformation((int)AccessLogAction.DocumentUnlocked, "Failed to unlock {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
-            this.SaveChanges();
+            SaveChanges();
             return new UnauthorizedResult();
         }
 
@@ -182,8 +181,7 @@ namespace DocStoreAPI.Repositories
         {
             LogUserAction(username, AccessLogAction.DocumentUpdate, objectValue, objectType, false);
             _logger.LogInformation((int)AccessLogAction.DocumentUpdate, "Failed to update {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
-            this.SaveChanges();
-
+            SaveChanges();
 
             var res = new ContentResult
             {

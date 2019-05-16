@@ -12,6 +12,7 @@ namespace DocStoreAPI.Repositories
     {
         private readonly DocStoreContext _context;
         private readonly ILogger _logger;
+        
 
         public BuisnessAreaRepository(ILogger<BuisnessAreaRepository> logger, DocStoreContext docStoreContext)
         {
@@ -31,8 +32,8 @@ namespace DocStoreAPI.Repositories
 
         public void DeleteById(int id)
         {
-            var entity = this.GetById(id);
-            this.Delete(entity);
+            var entity = GetById(id);
+            Delete(entity);
         }
 
         public void Edit(BuisnessAreaEntity entity)
@@ -43,12 +44,12 @@ namespace DocStoreAPI.Repositories
 
         public BuisnessAreaEntity GetById(int id)
         {
-            var entity = _context.BuisnessAreas.FirstOrDefault(g => g.Id == id);
+            return _context.BuisnessAreas.FirstOrDefault(g => g.Id == id);
+        }
 
-            if (string.IsNullOrWhiteSpace(entity.Name))
-                throw new Exception("Unable to Find Buisness Area With Specified ID");
-
-            return entity;
+        public BuisnessAreaEntity GetByName(string name)
+        {
+            return _context.BuisnessAreas.FirstOrDefault(g => g.Name == name);
         }
 
         public IEnumerable<BuisnessAreaEntity> List()
@@ -59,6 +60,22 @@ namespace DocStoreAPI.Repositories
         public IEnumerable<BuisnessAreaEntity> List(Expression<Func<BuisnessAreaEntity, bool>> predicate)
         {
             return _context.BuisnessAreas.Where(predicate).AsEnumerable();
+        }
+
+        public IEnumerable<BuisnessAreaEntity> ListP(out int totalPages, int perPage, int page)
+        {
+            int totalRecords = _context.BuisnessAreas.Count();
+
+            totalPages = 0;
+            if (totalRecords > 0)
+                totalPages = (((totalRecords - 1) / perPage) + 1);
+            IEnumerable<BuisnessAreaEntity> entities;
+            if (page == 0)
+                entities = _context.BuisnessAreas.Take(perPage).AsEnumerable();
+            else
+                entities = _context.BuisnessAreas.Skip(page * perPage).Take(perPage).AsEnumerable();
+
+            return entities;
         }
     }
 }

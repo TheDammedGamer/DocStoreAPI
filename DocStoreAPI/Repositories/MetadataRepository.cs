@@ -27,13 +27,11 @@ namespace DocStoreAPI.Repositories
             _securityRepository = securityRepository;
         }
 
-        
-
         public void Add(ref MetadataEntity entity)
         {
             _context.MetadataEntities.Add(entity);
 
-            this.SaveChanges();
+            SaveChanges();
         }
 
         public void Delete(MetadataEntity entity)
@@ -43,21 +41,21 @@ namespace DocStoreAPI.Repositories
             _context.MetadataEntities.Remove(entity);
 
 
-            this.SaveChanges();
+            SaveChanges();
         }
 
         public void DeleteVersion(DocumentVersionEntity entity)
         {
             _context.DocumentVersions.Remove(entity);
 
-            this.SaveChanges();
+            SaveChanges();
         }
 
         public void DeleteById(int id)
         {
             var entity = GetById(id, true, true);
 
-            this.Delete(entity);
+            Delete(entity);
         }
 
         public void Edit(MetadataEntity entity)
@@ -267,7 +265,6 @@ namespace DocStoreAPI.Repositories
         {
             bool rename = false;
             bool changed = false;
-            bool baChange = false;
 
             foreach (PropertyInfo property in entityOriginal.GetType().GetProperties())
             {
@@ -295,7 +292,6 @@ namespace DocStoreAPI.Repositories
                             break;
                         case "BuisnessArea":
                             changed = true;
-                            baChange = true;
                             entityOriginal.BuisnessArea = entity.BuisnessArea;
                             break;
                         case "BuisnessMetadata":
@@ -303,7 +299,8 @@ namespace DocStoreAPI.Repositories
                             entityOriginal.BuisnessMetadata = entity.BuisnessMetadata;
                             break;
                         default:
-                            throw new Exception("Unable to Change this Property via this API Call");
+                            break;
+                            //throw new Exception("Unable to Change this Property via this API Call");
                     }
                 }
             }
@@ -312,16 +309,6 @@ namespace DocStoreAPI.Repositories
             {
                 entityOriginal.LastUpdate.Update(context.User.Identity.Name);
                 Touch(ref entityOriginal);
-            }
-            if (baChange)
-            {
-                var isAuthed = _securityRepository.UserIsAuthorisedByBuisnessAreas(context, AuthActions.Update, entityOriginal.BuisnessArea);
-
-                if (!isAuthed)
-                {
-                    _context.RejectModifications();
-                    throw new Exception("User does not Have access to chnaged the document's BuisnessArea");
-                }
             }
 
             if (rename)

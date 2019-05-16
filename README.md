@@ -1,10 +1,10 @@
 # DocStoreAPI
 A simple asp.net core document managment api, backed by SQL Server, AzureAd, ActiveDirectory, Azure storage and SMB shares.
 
-At it's core DocStorAPI is a simple document management API designed to be easily intergratable with other projects that require an auditable service.
+At it's core DocStoreAPI is a simple document management API designed to be easily intergratable with other projects that require an auditable document managment system.
 
 # In-Practice
-The application stores docuemnts within `stors` such as a file share or Azure Blob Storage, and then links theese documents to 
+The application stores docuemnts within `stors` such as a file share or Azure Blob Storage, and then stores the document metadat within SQL Server. Buisness Metadta is stored as simple Key Value Pairs where as the document properties are stored in a flat structure.
 
 
 ## To-Do (MVP)
@@ -13,19 +13,21 @@ The application stores docuemnts within `stors` such as a file share or Azure Bl
 - [x] Add ACE state of `Supervisor` to manage permissions by Buisness Area.
 - [x] Inject Admin Groups via Config.
 - [x] Implement Admin or 'Supervisor' Check on Security Controller(s).
-- [ ] Implement Metadata filtering on `DocumentMetadataController.Put` & `DocumentMetadataController.Post` to ensure generated values aren't being overwritten and document names are updated when nessacary. (Partially Completed)
+- [ ] Implement Metadata filtering on `DocumentMetadataController.Put` & `DocumentMetadataController.Post` to ensure generated values aren't being overwritten and document names are updated when necessary. (Partially Completed)
 	- [x] Add User Edit Metod to limit the properties that can be edited by Put.
 	- [x] Verify Post Data and strip Generated Data.
 - [ ] Redifne the Gates on the group controller and remove the exception when the object is null
 - [x] Update User Is authorised by Buisness Area to support Admins.
 - [ ] Implement a Search by Custom Metadata Keys in `DocumentMetadataController` using `SearchByCustomMetadataKey`.
-	- [ ] Use a class passed as the body to store the search Data with Queries for the Pagination etc 
+	- [ ] Use a class passed as the body to store the search Data with Queries for the Pagination etc.
+- [ ] update `BuisnessArea` and `Group` conrtollers to search by string not id.
 - [ ] Add a Client library.
 - [ ] Add an example WPF app.
 
 ## Version 2 improvements
 - Implement Background Worker and Queue to manage archival, deletion and movement of documents instead of at Runtime.
 - Implement simple polices based upon BuisnessArea to define automatic movement policies based on Stors and BuisnessAreas.
+- Implement a Admin management interface.
 - Add Support for MySql as an alternative database.
 - Add Support for Comsmos DB as an alternative database (requires .net core 3).
 - Look into Support for AWS storage.

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using DocStoreAPI.Models;
 using DocStoreAPI.Repositories;
+using Microsoft.Extensions.Primitives;
 
 namespace DocStoreAPI.Controllers
 {
@@ -22,33 +23,40 @@ namespace DocStoreAPI.Controllers
             _buisnessAreaRepository = repository;
             _securityRepository = securityRepository;
         }
-        // GET: api/BuisnessArea
+        // GET: api/BuisnessArea?page=1&perPage=20
         [HttpGet]
-        public IActionResult Get()
+        public IActionResult Get([FromQuery]int page = 0, [FromQuery] int perPage = 25)
         {
             var currentUser = HttpContext.User.Identity.Name;
 
             if (!_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BAList, _objectType, "NA");
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BAList, _objectType, string.Empty);
 
-            var buisnessAreas = _buisnessAreaRepository.List();
+            int pageCount = 0;
+
+            var buisnessAreas = _buisnessAreaRepository.ListP(out pageCount, perPage, page);
+
+            if (buisnessAreas.Count() == 0)
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.BAList, _objectType, string.Empty);
+
+            HttpContext.Response.Headers.Add(new KeyValuePair<string, StringValues>("TotalPages", pageCount.ToString()));
 
             return Ok(buisnessAreas);
         }
 
-        // GET: api/BuisnessArea/5
-        [HttpGet("{id}", Name = "Get")]
-        public IActionResult Get(int id)
+        // GET: api/BuisnessArea/HR
+        [HttpGet("{name}", Name = "Get")]
+        public IActionResult Get(string name)
         {
             var currentUser = HttpContext.User.Identity.Name;
 
-            var entity = _buisnessAreaRepository.GetById(id);
+            if (!_securityRepository.UserIsAdmin(HttpContext))
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BAReturn, _objectType, name);
+
+            var entity = _buisnessAreaRepository.GetByName(name);
 
             if (String.IsNullOrWhiteSpace(entity.Name))
-                return _securityRepository.GateNotFound(currentUser, AccessLogAction.BAReturn, _objectType, id.ToString());
-
-            if (!_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BAReturn, _objectType, id.ToString());
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.BAReturn, _objectType, name);
 
             return Ok(entity);
         }
@@ -60,7 +68,7 @@ namespace DocStoreAPI.Controllers
             var currentUser = HttpContext.User.Identity.Name;
 
             if (!_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BACreate, _objectType, "NA");
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BACreate, _objectType, string.Empty);
 
             _buisnessAreaRepository.Add(value);
             _buisnessAreaRepository.SaveChanges();
@@ -68,19 +76,19 @@ namespace DocStoreAPI.Controllers
             return Ok(value);
         }
 
-        // PUT: api/BuisnessArea/5
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] BuisnessAreaEntity value)
+        // PUT: api/BuisnessArea/HR
+        [HttpPut("{name}")]
+        public IActionResult Put(string name, [FromBody] BuisnessAreaEntity value)
         {
             var currentUser = HttpContext.User.Identity.Name;
 
-            var entity = _buisnessAreaRepository.GetById(id);
+            if (!_securityRepository.UserIsAdmin(HttpContext))
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BAUpdate, _objectType, name);
+
+            var entity = _buisnessAreaRepository.GetByName(name);
 
             if (String.IsNullOrWhiteSpace(entity.Name))
-                return _securityRepository.GateNotFound(currentUser, AccessLogAction.BAUpdate, _objectType, id.ToString());
-
-            if (!_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BAUpdate, _objectType, id.ToString());
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.BAUpdate, _objectType, name);
 
             _buisnessAreaRepository.Edit(value);
             _buisnessAreaRepository.SaveChanges();
@@ -88,21 +96,21 @@ namespace DocStoreAPI.Controllers
             return Ok(value);
         }
 
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        // DELETE: api/ApiWithActions/HR
+        [HttpDelete("{name}")]
+        public IActionResult Delete(string name)
         {
             var currentUser = HttpContext.User.Identity.Name;
 
-            var entity = _buisnessAreaRepository.GetById(id);
+            if (!_securityRepository.UserIsAdmin(HttpContext))
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BADelete, _objectType, name);
+
+            var entity = _buisnessAreaRepository.GetByName(name);
 
             if (String.IsNullOrWhiteSpace(entity.Name))
-                return _securityRepository.GateNotFound(currentUser, AccessLogAction.BADelete, _objectType, id.ToString());
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.BADelete, _objectType, name);
 
-            if (!_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BADelete, _objectType, id.ToString());
-
-            _buisnessAreaRepository.DeleteById(id);
+            _buisnessAreaRepository.DeleteById(entity.Id);
             _buisnessAreaRepository.SaveChanges();
 
             return Ok();

@@ -31,8 +31,8 @@ namespace DocStoreAPI.Repositories
 
         public void DeleteById(int id)
         {
-            var entity = this.GetById(id);
-            this.Delete(entity);
+            var entity = GetById(id);
+            Delete(entity);
         }
 
         public void Edit(GroupEntity entity)
@@ -43,12 +43,12 @@ namespace DocStoreAPI.Repositories
 
         public GroupEntity GetById(int id)
         {
-            var entity = _context.GroupEntities.FirstOrDefault(g => g.Id == id);
+            return _context.GroupEntities.FirstOrDefault(g => g.Id == id);
+        }
 
-            if (string.IsNullOrWhiteSpace(entity.Name))
-                throw new Exception("Unable to Find Dcoument With Specified ID");
-
-            return entity;
+        public GroupEntity GetByName(string name)
+        {
+            return _context.GroupEntities.FirstOrDefault(g => g.Name == name);
         }
 
         public IEnumerable<GroupEntity> List()
@@ -59,6 +59,22 @@ namespace DocStoreAPI.Repositories
         public IEnumerable<GroupEntity> List(Expression<Func<GroupEntity, bool>> predicate)
         {
             return _context.GroupEntities.Where(predicate).AsEnumerable();
+        }
+
+        public IEnumerable<GroupEntity> ListP(out int totalPages, int perPage, int page)
+        {
+            int totalRecords = _context.GroupEntities.Count();
+
+            totalPages = 0;
+            if (totalRecords > 0)
+                totalPages = (((totalRecords - 1) / perPage) + 1);
+            IEnumerable<GroupEntity> entities;
+            if (page == 0)
+                entities = _context.GroupEntities.Take(perPage).AsEnumerable();
+            else
+                entities = _context.GroupEntities.Skip(page * perPage).Take(perPage).AsEnumerable();
+
+            return entities;
         }
     }
 }
