@@ -41,6 +41,9 @@ namespace DocStoreAPI.Controllers
 
             HttpContext.Response.Headers.Add(new KeyValuePair<string, StringValues>("TotalPages", pageCount.ToString()));
 
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.BAList, string.Empty, _objectType, true);
+            _securityRepository.SaveChanges();
+
             return Ok(buisnessAreas);
         }
 
@@ -58,6 +61,9 @@ namespace DocStoreAPI.Controllers
             if (String.IsNullOrWhiteSpace(entity.Name))
                 return _securityRepository.GateNotFound(currentUser, AccessLogAction.BAReturn, _objectType, name);
 
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.BAReturn, name, _objectType, true);
+            _securityRepository.SaveChanges();
+
             return Ok(entity);
         }
 
@@ -71,6 +77,8 @@ namespace DocStoreAPI.Controllers
                 return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BACreate, _objectType, string.Empty);
 
             _buisnessAreaRepository.Add(value);
+
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.BACreate, value.Name, _objectType, true);
             _buisnessAreaRepository.SaveChanges();
 
             return Ok(value);
@@ -91,6 +99,9 @@ namespace DocStoreAPI.Controllers
                 return _securityRepository.GateNotFound(currentUser, AccessLogAction.BAUpdate, _objectType, name);
 
             _buisnessAreaRepository.Edit(value);
+
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.BAUpdate, name, _objectType, true);
+
             _buisnessAreaRepository.SaveChanges();
 
             return Ok(value);
@@ -111,6 +122,9 @@ namespace DocStoreAPI.Controllers
                 return _securityRepository.GateNotFound(currentUser, AccessLogAction.BADelete, _objectType, name);
 
             _buisnessAreaRepository.DeleteById(entity.Id);
+
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.BADelete, name, _objectType, true);
+
             _buisnessAreaRepository.SaveChanges();
 
             return Ok();

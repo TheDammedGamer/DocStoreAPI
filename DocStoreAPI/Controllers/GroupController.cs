@@ -36,12 +36,13 @@ namespace DocStoreAPI.Controllers
             if (_securityRepository.UserIsAdmin(HttpContext))
                 return _securityRepository.GateUnathorised(currentUser, AccessLogAction.GroupList, _object, string.Empty);
 
-            int pageCount = 0;
 
-            var groups = _groupRepository.ListP(out pageCount, perPage, page);
+            var groups = _groupRepository.ListP(out int pageCount, perPage, page);
 
             if (groups.Count() == 0)
                 return _securityRepository.GateNotFound(currentUser, AccessLogAction.GroupList, _object, string.Empty);
+
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.GroupList, string.Empty, _object, true);
 
             HttpContext.Response.Headers.Add(new KeyValuePair<string, StringValues>("TotalPages", pageCount.ToString()));
 
@@ -50,7 +51,7 @@ namespace DocStoreAPI.Controllers
 
         // GET: api/Group/hrusers
         [HttpGet("{name}", Name = "Get")]
-        public IActionResult Get(String name)
+        public IActionResult Get(string name)
         {
             string currentUser = HttpContext.User.Identity.Name;
 
@@ -61,6 +62,8 @@ namespace DocStoreAPI.Controllers
             
             if (string.IsNullOrWhiteSpace(entity.Name))
                 return _securityRepository.GateNotFound(currentUser, AccessLogAction.GroupReturn, _object, name);
+
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.GroupReturn, name, _object, true);
 
             return Ok(entity);
         }
@@ -75,9 +78,12 @@ namespace DocStoreAPI.Controllers
                 return _securityRepository.GateUnathorised(currentUser, AccessLogAction.GroupCreate, _object, string.Empty);
 
             _groupRepository.Add(value);
+
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.GroupCreate, value.Name, _object, true);
+
             _groupRepository.SaveChanges();
 
-            return Ok(value); // returns Value with ID
+            return Ok(value);
         }
 
         // PUT: api/Group/hrusers
@@ -95,6 +101,8 @@ namespace DocStoreAPI.Controllers
                 return _securityRepository.GateNotFound(currentUser, AccessLogAction.GroupUpdate, _object, name);
 
             _groupRepository.Edit(value);
+
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.GroupUpdate, name, _object, true);
             _groupRepository.SaveChanges();
 
             return Ok(value);
@@ -115,6 +123,9 @@ namespace DocStoreAPI.Controllers
                 return _securityRepository.GateNotFound(currentUser, AccessLogAction.GroupDelete, _object, name);
 
             _groupRepository.DeleteById(entity.Id);
+
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.GroupDelete, name, _object, true);
+
             _groupRepository.SaveChanges();
 
             return Ok();

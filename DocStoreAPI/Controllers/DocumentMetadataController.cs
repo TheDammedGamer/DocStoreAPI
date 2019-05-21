@@ -96,10 +96,11 @@ namespace DocStoreAPI.Controllers
                 return _securityRepository.GateCannotLock(currentUser, "Metadata", id.ToString());
 
             _metadataRepository.Touch(ref item);
-            _metadataRepository.SaveChanges();
 
             _logger.Log(LogLevel.Information, "DocumentMetadata {0} Locked By {1}", item.Id, currentUser);
             _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentLocked, item.Id.ToString(), "Metadata", true);
+
+            _metadataRepository.SaveChanges();
 
             return Ok(success);
         }
@@ -124,10 +125,11 @@ namespace DocStoreAPI.Controllers
                 return _securityRepository.GateCannotUnlock(currentUser, "Metadata", id.ToString());
 
             _metadataRepository.Touch(ref item);
-            _metadataRepository.SaveChanges();
-
+            
             _logger.Log(LogLevel.Information, "DocumentMetadata {0} Locked By {1}", item.Id, currentUser);
             _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentUnlocked, item.Id.ToString(), "Metadata", true);
+
+            _metadataRepository.SaveChanges();
 
             return Ok(success);
         }
@@ -142,10 +144,10 @@ namespace DocStoreAPI.Controllers
 
             _metadataRepository.AddNew(ref value, currentUser);
 
-            _metadataRepository.SaveChanges();
-
             _logger.Log(LogLevel.Information, "DocumentMetadata {0} Created By {1}", value.Id, currentUser);
             _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentMetadataCreate, value.Id.ToString(), "Metadata", true);
+
+            _metadataRepository.SaveChanges();
 
             return Ok(value);
         }
@@ -166,10 +168,10 @@ namespace DocStoreAPI.Controllers
 
             _metadataRepository.UserEdit(ref origItem, value, HttpContext);
 
-            _metadataRepository.SaveChanges();
-
             _logger.Log(LogLevel.Information, "DocumentMetadata {0} Edited By {1}", origItem.Id, currentUser);
             _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentMetadataUpdate, origItem.Id.ToString(), "Metadata", true);
+
+            _metadataRepository.SaveChanges();
 
             return Ok(origItem);
         }
@@ -202,6 +204,8 @@ namespace DocStoreAPI.Controllers
 
             _logger.Log(LogLevel.Information, "Document {0} Deleted By {1}", origItem.Id, currentUser);
             _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentDelete, id, "Document", true);
+
+            _metadataRepository.SaveChanges();
 
             return Ok();
         }

@@ -33,14 +33,16 @@ namespace DocStoreAPI.Controllers
             if (!_securityRepository.UserIsAdmin(HttpContext))
                 return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACEList, _object, string.Empty);
 
-            int pageCount = 0;
-
-            var entities = _accessRepository.ListP(out pageCount, perPage, page);
+            var entities = _accessRepository.ListP(out int pageCount, perPage, page);
 
             if (entities.Count() == 0)
                 _securityRepository.GateNotFound(currentUser, AccessLogAction.ACEList, _object, string.Empty);
 
             HttpContext.Response.Headers.Add(new KeyValuePair<string, StringValues>("TotalPages", pageCount.ToString()));
+
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.ACEList, string.Empty, _object, true);
+
+            _securityRepository.SaveChanges();
 
             return Ok(entities);
         }
@@ -59,6 +61,10 @@ namespace DocStoreAPI.Controllers
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Supervisor, result.BusinessArea))
                 return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACEReturn, _object, id.ToString());
 
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.ACEReturn, id.ToString(), _object, true);
+
+            _securityRepository.SaveChanges()
+
             return Ok(result);
         }
 
@@ -72,7 +78,12 @@ namespace DocStoreAPI.Controllers
                 return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACECreate, _object, string.Empty);
 
             _accessRepository.Add(value);
+
             _accessRepository.SaveChanges();
+
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.ACECreate, value.Id, _object, true);
+
+            _securityRepository.SaveChanges();
 
             return Ok(value);
         }
@@ -92,6 +103,9 @@ namespace DocStoreAPI.Controllers
                 return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACEUpdate, _object, id.ToString());
 
             _accessRepository.Edit(value);
+
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.ACEUpdate, id.ToString(), _object, true);
+
             _accessRepository.SaveChanges();
 
             return Ok(value);
@@ -112,6 +126,9 @@ namespace DocStoreAPI.Controllers
                 return _securityRepository.GateUnathorised(currentUser, AccessLogAction.ACEDelete, _object, entity.Id.ToString());
 
             _accessRepository.DeleteById(id);
+
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.ACEDelete, entity.Id.ToString(), _object, true);
+
             _accessRepository.SaveChanges();
 
             return Ok();

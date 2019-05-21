@@ -30,8 +30,6 @@ namespace DocStoreAPI.Repositories
         public void Add(ref MetadataEntity entity)
         {
             _context.MetadataEntities.Add(entity);
-
-            SaveChanges();
         }
 
         public void Delete(MetadataEntity entity)
@@ -39,16 +37,11 @@ namespace DocStoreAPI.Repositories
             _context.DocumentVersions.RemoveRange(entity.Versions);
 
             _context.MetadataEntities.Remove(entity);
-
-
-            SaveChanges();
         }
 
         public void DeleteVersion(DocumentVersionEntity entity)
         {
             _context.DocumentVersions.Remove(entity);
-
-            SaveChanges();
         }
 
         public void DeleteById(int id)
