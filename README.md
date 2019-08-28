@@ -1,7 +1,7 @@
 # DocStoreAPI
-A simple asp.net core document managment api, backed by SQL Server, AzureAd, ActiveDirectory, Azure storage and SMB shares.
+A simple asp.net core document managment api, backed by SQL Server, Azure storage and SMB shares, and secured by Azure Active Directory or Active Directory .
 
-At it's core DocStoreAPI is a simple document management API designed to be easily intergratable with other projects that require an auditable document managment system.
+At it's core DocStoreAPI is a simple API designed to be easily intergratable with other projects that require an auditable document managment system.
 
 # In-Practice
 The application stores docuemnts within `stors` such as a file share or Azure Blob Storage, and then stores the document metadat within SQL Server. Buisness Metadta is stored as simple Key Value Pairs where as the document properties are stored in a flat structure.
@@ -18,23 +18,27 @@ The application stores docuemnts within `stors` such as a file share or Azure Bl
 	- [x] Verify Post Data and strip Generated Data.
 - [x] Redifne the Gates on the group controller and remove the exception when the object is null
 - [x] Update User Is authorised by Buisness Area to support Admins.
-- [ ] Implement a Search by Custom Metadata Keys in `DocumentMetadataController` using `SearchByCustomMetadataKey`.
-	- [ ] Use a class passed as the body to store the search Data with Queries for the Pagination etc.
-- [ ] update `BuisnessArea` and `Group` conrtollers to search by string not id.
+- ~[ ] Implement a Search by Custom Metadata Keys in `DocumentMetadataController` using `SearchByCustomMetadataKey`.~
+- [x] Implement a search 
+	- [x] Use a class passed as the body to store the search Data with Queries for the Pagination etc.
+- [x] update `BuisnessArea` and `Group` conrtollers to search by string not id.
+- [ ] Go through and ensure that Auditing is being stored in the database
+- [ ] Add Unit Tests
 - [ ] Add a Client library.
 - [ ] Add an example WPF app.
 
 ## Version 2 improvements
 - Implement Background Worker and Queue to manage archival, deletion and movement of documents instead of at Runtime.
 - Implement simple polices based upon BuisnessArea to define automatic movement policies based on Stors and BuisnessAreas.
+	- Use [Rules Engine](https://github.com/microsoft/RulesEngine) to implement polices
 - Implement a Admin management interface.
 - Add Support for MySql as an alternative database.
 - Add Support for Comsmos DB as an alternative database (requires .net core 3).
 - Look into Support for AWS storage.
-- Look into Supporting other Identity providers.
 
 ## Possible Version 3 Improvements
 - Support for Metadata / Security caching possible using redis or something similar.
+- Look into Supporting other Identity providers.
 
 
 # Example Configs
@@ -48,7 +52,7 @@ The application stores docuemnts within `stors` such as a file share or Azure Bl
 {
   "AzureAd": {
     "Instance": "https://login.microsoftonline.com/",
-    "Domain": "qualified.domain.name", //for instance contoso.onmicrosoft.com
+    "Domain": "instance.onmicrosoft.com",
     "TenantId": "22222222-2222-2222-2222-222222222222",
     "ClientId": "11111111-1111-1111-11111111111111111"
   },
@@ -71,7 +75,7 @@ The application stores docuemnts within `stors` such as a file share or Azure Bl
 
 ## StorConfig.json
 
-- Only use Auth if needed otherwise AD is better 
+- Only use SMB share auth if needed otherwise just grant access via the run as account.
 - Don't add a trailing slash to the end of the file paths in `BasePath`
 
 ``` json

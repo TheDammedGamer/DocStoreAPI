@@ -31,21 +31,21 @@ namespace DocStoreAPI.Controllers
         //Actual result is List<MetadataEntity>
         // GET: api/DocumentMetadata/HR?page=1&perPage=50
         [HttpGet("{buisnessArea}")]
-        public IActionResult ListByBuisnessArea(string buisnessArea, [FromQuery]int page = 0, [FromQuery] int perPage = 25)
+        public IActionResult ListByBuisnessArea(string buisnessArea, [FromQuery]int page = 0, [FromQuery] int perPage = 25, [FromQuery] bool getAll = false)
         {
             string currentUser = HttpContext.User.Identity.Name;
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Return, buisnessArea))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.DocumentMetadataSearched, "Metadata", buisnessArea);
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.DocumentMetadataSearch, "Metadata", buisnessArea);
 
             int pageCount = 0;
 
-            List<MetadataEntity> metaItems = _metadataRepository.ListByBuisnessAreaPaged(buisnessArea, page, perPage, out pageCount);
+            List<MetadataEntity> metaItems = _metadataRepository.ListByBuisnessArea(buisnessArea, page, perPage, out pageCount, getAll: getAll);
 
             if (metaItems.Count == 0)
-                return _securityRepository.GateNotFound(currentUser, AccessLogAction.DocumentMetadataSearched, "Metadata", buisnessArea);
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.DocumentMetadataSearch, "Metadata", buisnessArea);
 
             _logger.Log(LogLevel.Information, "Getting DocumentMetadata Within BuisnessArea {0} for User {1}", buisnessArea, currentUser);
-            _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentMetadataSearched, buisnessArea, "Metadata", true);
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentMetadataSearch, buisnessArea, "Metadata", true);
 
             HttpContext.Response.Headers.Add(new KeyValuePair<string, StringValues>("TotalPages", pageCount.ToString()));
 
@@ -73,6 +73,30 @@ namespace DocStoreAPI.Controllers
             _metadataRepository.SaveChanges();
 
             return Ok(item);
+        }
+
+        //Actual Result is List<MetadataEntity>
+        // PUT: api/DocumentMetadata/Search?incArchive=false
+        [HttpPut("/Search", Name = "Search")]
+        public IActionResult Search( [FromBody]BuisnessMetadataSearch currentSearch, [FromQuery] bool incArchive = false)
+        {
+            string currentUser = HttpContext.User.Identity.Name;
+
+            if (currentSearch == null)
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.DocumentMetadataSearch, "Metadata", currentSearch.BusinessArea);
+
+            if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Return, currentSearch.BusinessArea))
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.DocumentMetadataSearch, "Metadata", currentSearch.BusinessArea);
+
+            var result = _metadataRepository.SearchByBuisnessMetadata(currentSearch, incArchive);
+
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentMetadataSearch, currentSearch.BusinessArea, "Metadata", true);
+
+            _securityRepository.LogUserSearch(currentUser, currentSearch.BusinessArea, currentSearch);
+
+            _securityRepository.SaveChanges();
+
+            return Ok(result);
         }
 
 

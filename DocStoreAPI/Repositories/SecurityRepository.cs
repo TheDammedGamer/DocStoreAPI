@@ -49,6 +49,10 @@ namespace DocStoreAPI.Repositories
         {
             _context.AccessLogEntities.Add(new AccessLogEntity(context.User.Identity.Name, actionId, targetId, targetType, success));
         }
+        public void LogUserSearch(string user, string BuisnessArea, BuisnessMetadataSearch search)
+        {
+            _context.SearchLogs.Add(new SearchLogEntity(user, BuisnessArea, search));
+        }
 
 
         public bool UserIsAdmin(HttpContext context)

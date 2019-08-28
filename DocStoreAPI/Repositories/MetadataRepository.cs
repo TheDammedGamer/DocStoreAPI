@@ -86,8 +86,20 @@ namespace DocStoreAPI.Repositories
                 .AsEnumerable();
             }
         }
+        public List<MetadataEntity> ListByBuisnessArea(string buisnessArea, int page, int perPage, out int totalPages, bool includeArchive = false, bool includeOldVersions = false, bool getAll = false)
+        {
+            if (getAll)
+            {
+                totalPages = 1;
+                return ListByBuisnessAreaAll(buisnessArea, includeArchive, includeOldVersions);
+            }
+            else
+            {
+                return ListByBuisnessAreaPaged(buisnessArea, page, perPage, out totalPages, includeArchive, includeOldVersions)
+            }
+        }
 
-        public IEnumerable<MetadataEntity> ListByBuisnessArea(string buisnessArea, bool includeArchive = false, bool includeOldVersions = false)
+        private List<MetadataEntity> ListByBuisnessAreaAll(string buisnessArea, bool includeArchive, bool includeOldVersions)
         {
             var entities = _context.MetadataEntities
                 .Where(meta => meta.BuisnessArea == buisnessArea);
@@ -99,10 +111,10 @@ namespace DocStoreAPI.Repositories
             if (includeOldVersions)
                 entities = entities.Include(m => m.Versions);
 
-            return entities.AsEnumerable();
+            return entities.ToList();
         }
 
-        public List<MetadataEntity> ListByBuisnessAreaPaged(string buisnessArea, int page, int perPage, out int totalPages, bool includeArchive = false, bool includeOldVersions = false)
+        private List<MetadataEntity> ListByBuisnessAreaPaged(string buisnessArea, int page, int perPage, out int totalPages, bool includeArchive, bool includeOldVersions)
         {
             var entities = _context.MetadataEntities
                 .Where(meta => meta.BuisnessArea == buisnessArea);
@@ -312,5 +324,105 @@ namespace DocStoreAPI.Repositories
             return entityOriginal;
         }
 
+        public List<MetadataEntity> SearchByBuisnessMetadata(BuisnessMetadataSearch search, bool incArchive)
+        {
+            List<MetadataEntity> results = new List<MetadataEntity>();
+            List<int> documentIds = new List<int>();
+
+            foreach (var searchItem in search.Search)
+            {
+                switch (searchItem.Type)
+                {
+                    case "Equality":
+                        {
+                            var item = (SearchEquality)searchItem;
+
+                            List<int> docIds = new List<int>();
+
+                            var query = _context.MetadataEntities.Where(qe => qe.BuisnessArea == search.BusinessArea);
+
+                            if (item.Invert)
+                            {
+                                //Not Equal Search
+                                var bms = _context.BuisnessMetadata.Where(bm => bm.Key == item.Key && bm.Value != item.Value);
+
+                                foreach (var buisnessMetadata in bms)
+                                    docIds.Add(buisnessMetadata.DocumentId);
+                            }
+                            else
+                            {
+                                // Equals search
+                                var bms = _context.BuisnessMetadata.Where(bm => bm.Key == item.Key && bm.Value == item.Value);
+
+                                foreach (var buisnessMetadata in bms)
+                                    docIds.Add(buisnessMetadata.DocumentId);
+                            }
+
+                            SearchByBuisnessMetadataResults(docIds, search.Joiner, search.BusinessArea, ref results);
+
+                            break;
+                        }
+                    case "Present":
+                        {
+                            var item = (SearchPresent)searchItem;
+
+                            List<int> docIds = new List<int>();
+
+                            if (item.Invert)
+                            {
+                                //Is Not Present
+                                var bms = _context.BuisnessMetadata.Where(bm => bm.Key == item.Key && string.IsNullOrEmpty(bm.Value));
+
+                                foreach (var buisnessMetadata in bms)
+                                    docIds.Add(buisnessMetadata.DocumentId);
+                            }
+                            else
+                            {
+                                //Is Present
+                                var bms = _context.BuisnessMetadata.Where(bm => bm.Key == item.Key && !string.IsNullOrEmpty(bm.Value));
+
+                                foreach (var buisnessMetadata in bms)
+                                    docIds.Add(buisnessMetadata.DocumentId);
+                            }
+
+                            SearchByBuisnessMetadataResults(docIds, search.Joiner, search.BusinessArea, ref results);
+                            break;
+                        }
+                    case "AllKeys":
+                        {
+                            var item = (SearchAllKeys)searchItem;
+
+                            List<int> docIds = new List<int>();
+
+                            var bms =_context.BuisnessMetadata.Where(bm => bm.Value == item.Value).ToList();
+
+                            foreach (var buisnessMetadata in bms)
+                                docIds.Add(buisnessMetadata.DocumentId);
+
+
+                            SearchByBuisnessMetadataResults(docIds, search.Joiner, search.BusinessArea, ref results);
+
+                            break;
+                        }
+                    default:
+
+                        break;
+                }
+            }
+
+            return results.Distinct().Where(me => me.Archive.Is == incArchive).ToList()
+        }
+        private void SearchByBuisnessMetadataResults(List<int> docIds, SearchJoin joinType, string BuisnessArea, ref List<MetadataEntity> currentResults)
+        {
+            if (joinType == SearchJoin.And)
+            {
+                if (currentResults.Count > 0)
+                    currentResults = currentResults.Where(res => docIds.Contains(res.Id)).ToList(); //filter current results
+                else
+                    currentResults.AddRange(_context.MetadataEntities.Where(meta => meta.BuisnessArea == BuisnessArea  && docIds.Contains(meta.Id)).ToList());
+            }
+            else
+                currentResults.AddRange(_context.MetadataEntities.Where(meta => meta.BuisnessArea == BuisnessArea && docIds.Contains(meta.Id)).ToList());
+        }
     }
 }

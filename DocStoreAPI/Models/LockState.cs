@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DocStoreAPI.Models
 {
-    public class LockState
+    public class LockState : IEquatable<LockState>
     {
         public bool Is { get; protected set; }
         public string By { get; protected set; }
@@ -50,6 +50,27 @@ namespace DocStoreAPI.Models
                 return false;
             }
             
+        }
+        public bool Equals(LockState other)
+        {
+            //Check whether the compared object is null. 
+            if (Object.ReferenceEquals(other, null))
+                return false;
+
+            //Check whether the compared object references the same data. 
+            if (Object.ReferenceEquals(this, other))
+                return true;
+            if (Is)
+            {
+                return At.Equals(other.At) && Expiration.Equals(other.Expiration) && By.Equals(other.By);
+            }
+            else
+            {
+                if (other.Is)
+                    return false;
+                else
+                    return true;
+            }
         }
     }
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DocStoreAPI.Models
 {
-    public class MetadataEntity : EntityBase
+    public class MetadataEntity : EntityBase, IEquatable<MetadataEntity>
     {
         //Id is From Entity Base
         [Required]
@@ -65,6 +65,55 @@ namespace DocStoreAPI.Models
         {
             return string.Format("{0}.v{1}.{2}.{3}",
                 this.Id.ToString(), this.Version.ToString(), this.Name, this.Extension);
+        }
+
+        public bool Equals(MetadataEntity other)
+        {
+            //Check whether the compared object is null. 
+            if (Object.ReferenceEquals(other, null))
+                return false;
+
+            //Check whether the compared object references the same data. 
+            if (Object.ReferenceEquals(this, other))
+                return true;
+            
+            //Should be enough to compare equity
+            return Version.Equals(other.Version) && Name.Equals(other.Name) && StorName.Equals(other.StorName) && Extension.Equals(other.Extension) && BuisnessArea.Equals(other.BuisnessArea) && BuisnessMetadata.Equals(other.BuisnessMetadata) && Created.Equals(other.Created);
+        }
+
+        public bool ContainsBuisnessMetadataKeyValue(string cKey, string cValue)
+        {
+            if (string.IsNullOrWhiteSpace(cKey))
+                throw new Exception("Comparison Key is null, empty or whitespace");
+            if (string.IsNullOrWhiteSpace(cValue))
+                throw new Exception("Comparison Value is null, empty or whitespace");
+
+            if (this.BuisnessMetadata.Where(bm => bm.Key == cKey && bm.Value == cValue).Count() >= 1)
+                return true;
+            else
+                return false;
+        }
+
+        public bool ContainsBuisnessMetadataKey(string cKey)
+        {
+            if (string.IsNullOrWhiteSpace(cKey))
+                throw new Exception("Comparison Key is null, empty or whitespace");
+
+            if (this.BuisnessMetadata.Where(bm => bm.Key == cKey).Count() >= 1)
+                return true;
+            else
+                return false;
+        }
+
+        public bool ContainsBuisnessMetadataValue(string cValue)
+        {
+            if (string.IsNullOrWhiteSpace(cValue))
+                throw new Exception("Comparison Value is null, empty or whitespace");
+
+            if (this.BuisnessMetadata.Where(bm => bm.Value == cValue).Count() >= 1)
+                return true;
+            else
+                return false;
         }
     }
 }

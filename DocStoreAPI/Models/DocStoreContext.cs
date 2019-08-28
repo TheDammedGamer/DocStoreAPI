@@ -18,6 +18,7 @@ namespace DocStoreAPI.Models
         public DbSet<DocumentVersionEntity> DocumentVersions { get; set; }
         public DbSet<AccessLogEntity> AccessLogEntities { get; set; }
         public DbSet<BuisnessAreaEntity> BuisnessAreas { get; set; }
+        public DbSet<SearchLogEntity> SearchLogs { get; set; }
 
         public DbSet<Audit> AuditItems { get; set; }
 

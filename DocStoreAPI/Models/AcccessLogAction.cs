@@ -24,7 +24,7 @@ namespace DocStoreAPI.Models
 
         DocumentMetadataRead = 1201,
         DocumentMetadataUpdate = 1202,
-        DocumentMetadataSearched = 1203,
+        DocumentMetadataSearch = 1203,
         DocumentMetadataCreate = 1204,
 
         GroupCreate = 2001,
