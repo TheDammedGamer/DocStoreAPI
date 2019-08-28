@@ -18,25 +18,32 @@ The application stores docuemnts within `stors` such as a file share or Azure Bl
 	- [x] Verify Post Data and strip Generated Data.
 - [x] Redifne the Gates on the group controller and remove the exception when the object is null
 - [x] Update User Is authorised by Buisness Area to support Admins.
-- ~[ ] Implement a Search by Custom Metadata Keys in `DocumentMetadataController` using `SearchByCustomMetadataKey`.~
+~ Implement a Search by Custom Metadata Keys in `DocumentMetadataController` using `SearchByCustomMetadataKey`.~
 - [x] Implement a search 
 	- [x] Use a class passed as the body to store the search Data with Queries for the Pagination etc.
-- [x] update `BuisnessArea` and `Group` conrtollers to search by string not id.
-- [ ] Go through and ensure that Auditing is being stored in the database
-- [ ] Add Unit Tests
+- [x] Update `BuisnessArea` and `Group` conrtollers to search by strings not ids.
+- [ ] Go through and ensure that Auditing is being stored in the database not in logs.
+- [ ] Add more Logging on expections (Make sure they don't contain sensitive information).
+- [ ] Change Namespaces to >
+	- [ ] WebApi to DocStore.API
+	- [ ] Split Shared Code to Class Library in DocStore.Shared
+	- [ ] Client Code in DocStore.Client
+- [ ] Add Unit Tests.
 - [ ] Add a Client library.
 - [ ] Add an example WPF app.
 
-## Version 2 improvements
+### Version 2 improvements
 - Implement Background Worker and Queue to manage archival, deletion and movement of documents instead of at Runtime.
+- Implement a Admin management interface.
+	- Change the Stor Configs from a file to SQl and manage them through the Admin Portal
 - Implement simple polices based upon BuisnessArea to define automatic movement policies based on Stors and BuisnessAreas.
 	- Use [Rules Engine](https://github.com/microsoft/RulesEngine) to implement polices
-- Implement a Admin management interface.
+	- Store the Policies in SQL and make them managaeable through the Admin interface
 - Add Support for MySql as an alternative database.
 - Add Support for Comsmos DB as an alternative database (requires .net core 3).
 - Look into Support for AWS storage.
 
-## Possible Version 3 Improvements
+### Possible Version 3 Improvements
 - Support for Metadata / Security caching possible using redis or something similar.
 - Look into Supporting other Identity providers.
 
@@ -45,31 +52,31 @@ The application stores docuemnts within `stors` such as a file share or Azure Bl
 
 ## appsettings.json
 
-- `ConnectionStrings.DefaultConnection` is for the SQL Server used for metadata storage.
+- `ConnectionStrings.DefaultConnection` is the Metadata storage database connection string.
 - `StorConfigFilePath` is a Path so you can host the Stor Config on a shared drive
 
-```json
+``` json
 {
-  "AzureAd": {
-    "Instance": "https://login.microsoftonline.com/",
-    "Domain": "instance.onmicrosoft.com",
-    "TenantId": "22222222-2222-2222-2222-222222222222",
-    "ClientId": "11111111-1111-1111-11111111111111111"
-  },
-  "Logging": {
-    "LogLevel": {
-      "Default": "Warning"
-    }
-  },
-  "AllowedHosts": "*",
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=Server\\Instance;Database=DocStore;User Id=SQLUSer;Password=Password;"
-  },
-  "StorConfigFilePath": "D:\\DocStore\\Config\\StorConfig.json",
-  "AdminGroups": {
-    "ADAdminGroupNames": [ "Domain Admins", "DocStore Admins" ],
-    "AZAdminGroupNames": [ "DocStore Admins" ]
-  }
+	"AzureAd": {
+		"Instance": "https://login.microsoftonline.com/",
+		"Domain": "YourAzureADInstance.onmicrosoft.com",
+		"TenantId": "22222222-2222-2222-2222-222222222222",
+		"ClientId": "11111111-1111-1111-11111111111111111"
+	},
+	"Logging": {
+		"LogLevel": {
+			"Default": "Warning"
+		}
+	},
+	"AllowedHosts": "*",
+	"ConnectionStrings": {
+		"DefaultConnection": "Server=Server\\Instance;Database=DocStore;User Id=SQLUSer;Password=Password;"
+	},
+	"StorConfigFilePath": "D:\\DocStore\\Config\\StorConfig.json",
+	"AdminGroups": {
+		"ADAdminGroupNames": [ "Domain Admins", "DocStore Admins" ],
+		"AZAdminGroupNames": [ "DocStore Admins" ]
+	}
 }
 ```
 
@@ -79,38 +86,35 @@ The application stores docuemnts within `stors` such as a file share or Azure Bl
 - Don't add a trailing slash to the end of the file paths in `BasePath`
 
 ``` json
-
 {
-  "Stors": [
-    {
-      "RequiresAuth": false,
-      "UserName": null,
-      "Password": null,
-      "Domain": null,
-      "BasePath": "\\\\Sevrer\\Share\\DocStore01",
-      "StorType": "FileShareStor",
-      "ShortName": "DocStore01"
-    },
-    {
-      "RequiresAuth": false,
-      "UserName": null,
-      "Password": null,
-      "Domain": null,
-      "BasePath": "\\\\Sevrer\\Share\\DocStore02",
-      "StorType": "FileShareStor",
-      "ShortName": "DocStore02"
-    },
-    {
-      "ContainerName": "DocStoreContainer",
-      "AccessKey": "YourKeyHere",
-      "AccountName": "yourAccountNameHere",
-      "StorType": "AzureBlobStor",
-      "ShortName":  "AZDefaultStor"
-    }
-  ]
+	"Stors": [
+		{
+			"RequiresAuth": false,
+			"UserName": null,
+			"Password": null,
+			"Domain": null,
+			"BasePath": "\\\\Sevrer\\Share\\DocStore01",
+			"StorType": "FileShareStor",
+			"ShortName": "DocStore01"
+		},
+		{
+			"RequiresAuth": false,
+			"UserName": null,
+			"Password": null,
+			"Domain": null,
+			"BasePath": "\\\\Sevrer\\Share\\DocStore02",
+			"StorType": "FileShareStor",
+			"ShortName": "DocStore02"
+		},
+		{
+			"ContainerName": "DocStoreContainer",
+			"AccessKey": "YourKeyHere",
+			"AccountName": "yourAccountNameHere",
+			"StorType": "AzureBlobStor",
+			"ShortName":  "AZDefaultStor"
+		}
+	]
 }
-
-
 ```
 
 
