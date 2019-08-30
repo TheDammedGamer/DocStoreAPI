@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DocStore.API.Shared;
 using DocStore.Shared.Models;
 
 namespace DocStore.API.Models
