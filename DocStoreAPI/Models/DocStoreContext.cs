@@ -14,7 +14,6 @@ namespace DocStore.API.Models
         public DbSet<AccessControlEntity> AcessControlEntity { get; set; }
         public DbSet<GroupEntity> GroupEntities { get; set; }
         public DbSet<MetadataEntity> MetadataEntities { get; set; }
-        public DbSet<CustomMetadataEntity> CustomMetadataEntities { get; set; }
         public DbSet<BuisnessMetadata> BuisnessMetadata { get; set; }
         public DbSet<DocumentVersionEntity> DocumentVersions { get; set; }
         public DbSet<AccessLogEntity> AccessLogEntities { get; set; }

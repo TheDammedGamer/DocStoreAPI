@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DocStore.Shared
+namespace DocStore.Shared.Models
 {
     public abstract class EntityBase
     {

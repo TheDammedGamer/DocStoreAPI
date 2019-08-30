@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using DocStore.API.Models;
 using DocStore.API.Controllers;
 using DocStore.Shared.Models;
+using DocStore.Shared.Models.Search;
 
 namespace DocStore.API.Repositories
 {

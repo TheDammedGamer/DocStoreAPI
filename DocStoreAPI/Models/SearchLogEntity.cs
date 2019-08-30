@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using DocStore.Shared.Models;
+using DocStore.Shared.Models.Search;
 
 namespace DocStore.API.Models
 {

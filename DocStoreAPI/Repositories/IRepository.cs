@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using DocStore.API.Models;
+using DocStore.Shared.Models;
 
 namespace DocStore.API.Repositories
 {

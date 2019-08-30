@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DocStore.API.Models;
 using System.IO;
 using DocStore.API.Models.Stor;
+using DocStore.API.Extensions;
 using DocStore.Shared.Models;
 
 namespace DocStore.API.Repositories

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using DocStore.API.Models;
 using DocStore.API.Extensions;
 using DocStore.Shared.Models;
+using DocStore.Shared.Models.Search;
 
 namespace DocStore.API.Repositories
 {

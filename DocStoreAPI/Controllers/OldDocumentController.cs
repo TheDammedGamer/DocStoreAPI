@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using DocStore.API.Models;
-using DocStore.API.Shared;
-using Microsoft.AspNetCore.Authorization;
 using DocStore.API.Models.Stor;
+using DocStore.API.Shared;
+using DocStore.Shared.Models;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace DocStore.API.Controllers
 {
