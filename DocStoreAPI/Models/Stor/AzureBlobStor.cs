@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DocStoreAPI.Models.Stor
+namespace DocStore.API.Models.Stor
 {
     public class AzureBlobStor : IStor
     {

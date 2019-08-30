@@ -4,11 +4,11 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using DocStoreAPI.Models;
+using DocStore.API.Models;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 
-namespace DocStoreAPI.Shared
+namespace DocStore.API.Shared
 {
     public class DatabaseActions
     {

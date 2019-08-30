@@ -4,11 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DocStoreAPI.Models;
+using DocStore.API.Models;
 using System.IO;
-using DocStoreAPI.Models.Stor;
+using DocStore.API.Models.Stor;
+using DocStore.Shared.Models;
 
-namespace DocStoreAPI.Repositories
+namespace DocStore.API.Repositories
 {
     public class DocumentRepository
     {

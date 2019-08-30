@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using DocStoreAPI.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Microsoft.AspNetCore.Http;
+using DocStore.API.Models;
+using DocStore.API.Extensions;
+using DocStore.Shared.Models;
 
-namespace DocStoreAPI.Repositories
+namespace DocStore.API.Repositories
 {
     public class MetadataRepository : BaseRepository
     {
@@ -95,7 +97,7 @@ namespace DocStoreAPI.Repositories
             }
             else
             {
-                return ListByBuisnessAreaPaged(buisnessArea, page, perPage, out totalPages, includeArchive, includeOldVersions)
+                return ListByBuisnessAreaPaged(buisnessArea, page, perPage, out totalPages, includeArchive, includeOldVersions);
             }
         }
 
@@ -410,7 +412,7 @@ namespace DocStoreAPI.Repositories
                 }
             }
 
-            return results.Distinct().Where(me => me.Archive.Is == incArchive).ToList()
+            return results.Distinct().Where(me => me.Archive.Is == incArchive).ToList();
         }
         private void SearchByBuisnessMetadataResults(List<int> docIds, SearchJoin joinType, string BuisnessArea, ref List<MetadataEntity> currentResults)
         {

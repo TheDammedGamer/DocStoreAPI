@@ -1,12 +1,12 @@
-﻿using DocStoreAPI.Models;
-using DocStoreAPI.Repositories;
+﻿using DocStore.API.Models;
+using DocStore.API.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace DocStoreAPI.Shared
+namespace DocStore.API.Shared
 {
     public static class GenericExtensions
     {

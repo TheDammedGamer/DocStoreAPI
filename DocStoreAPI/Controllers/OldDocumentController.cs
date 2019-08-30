@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using DocStoreAPI.Models;
-using DocStoreAPI.Shared;
+using DocStore.API.Models;
+using DocStore.API.Shared;
 using Microsoft.AspNetCore.Authorization;
-using DocStoreAPI.Models.Stor;
+using DocStore.API.Models.Stor;
 
-namespace DocStoreAPI.Controllers
+namespace DocStore.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

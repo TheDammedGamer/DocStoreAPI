@@ -11,7 +11,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
 
-namespace DocStoreAPI.Models.Stor
+namespace DocStore.API.Models.Stor
 {
     public interface IStorConfig
     {

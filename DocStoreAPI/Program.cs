@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Server.IISIntegration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace DocStoreAPI
+namespace DocStore.API
 {
     public class Program
     {

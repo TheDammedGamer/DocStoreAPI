@@ -1,5 +1,4 @@
-﻿using DocStoreAPI.Models;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -8,9 +7,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
-using DocStoreAPI.Controllers;
+using DocStore.API.Models;
+using DocStore.API.Controllers;
+using DocStore.Shared.Models;
 
-namespace DocStoreAPI.Repositories
+namespace DocStore.API.Repositories
 {
     public class SecurityRepository : BaseRepository
     {

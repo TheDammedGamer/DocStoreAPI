@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DocStoreAPI.Models
+namespace DocStore.API.Models
 {
     public class AccessLogEntity : EntityBase
     {

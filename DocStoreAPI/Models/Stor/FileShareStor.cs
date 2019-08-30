@@ -6,7 +6,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace DocStoreAPI.Models.Stor
+namespace DocStore.API.Models.Stor
 {
     public class FileShareStor : IStor
     {

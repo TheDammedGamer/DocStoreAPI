@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Text;
 
-namespace DocStoreAPI.Shared
+namespace DocStore.API.Shared
 {
     public class GenericHelpers
     {

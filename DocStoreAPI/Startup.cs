@@ -17,11 +17,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Server.HttpSys;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication;
-using DocStoreAPI.Models;
-using DocStoreAPI.Models.Stor;
-using DocStoreAPI.Repositories;
+using DocStore.API.Models;
+using DocStore.API.Models.Stor;
+using DocStore.API.Repositories;
 
-namespace DocStoreAPI
+namespace DocStore.API
 {
     public class Startup
     {

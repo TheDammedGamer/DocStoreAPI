@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DocStoreAPI.Models
+namespace DocStore.API.Models
 {
     // Document = 10xx, DocumentVersion = 11xx, DocumentMetadata = 12xx, Group = 20xx, AccessControlEntity = 30xx
     public enum AccessLogAction

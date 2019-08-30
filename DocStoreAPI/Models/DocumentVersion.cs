@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DocStoreAPI.Models
+namespace DocStore.API.Models
 {
     public class DocumentVersionEntity : EntityBase
     {
@@ -45,10 +45,16 @@ namespace DocStoreAPI.Models
         {
             return string.Format("{0}.{1}", this.Name, this.Extension);
         }
-        public string GetServerFileName()
+    }
+
+
+    public static class DocumentVersionEntityExtension
+    {
+        public static string GetServerFileName(this DocumentVersionEntity versionEntity)
         {
             return string.Format("{0}.v{1}.{2}.{3}",
-                this.DocumentId.ToString(), this.Version.ToString(), this.Name, this.Extension);
+                versionEntity.DocumentId.ToString(), versionEntity.Version.ToString(), versionEntity.Name, versionEntity.Extension);
         }
     }
+
 }

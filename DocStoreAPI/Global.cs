@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace DocStoreAPI
+namespace DocStore.API
 {
     public static class Global
     {

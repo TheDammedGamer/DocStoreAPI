@@ -4,7 +4,7 @@ A simple asp.net core document managment api, backed by SQL Server, Azure storag
 At it's core DocStoreAPI is a simple API designed to be easily intergratable with other projects that require an auditable document managment system.
 
 # In-Practice
-The application stores docuemnts within `stors` such as a file share or Azure Blob Storage, and then stores the document metadat within SQL Server. Buisness Metadta is stored as simple Key Value Pairs where as the document properties are stored in a flat structure.
+The application stores documents within `stors` such as a file share or Azure Blob Storage, and then stores the document metadat within SQL Server. Buisness Metadta is stored as simple Key Value Pairs where as the document properties are stored in a flat structure.
 
 
 ## To-Do (MVP)

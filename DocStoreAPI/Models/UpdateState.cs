@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DocStoreAPI.Models
+namespace DocStore.API.Models
 {
     public class UpdateState : IEquatable<UpdateState>
     {
@@ -38,15 +38,6 @@ namespace DocStoreAPI.Models
 
             //Should be enought to compare equity
             return By.Equals(other.By) && At.Equals(other.At);
-        }
-    }
-
-    public static class UpdateStateExtensions
-    {
-        public static void ServerUpdate(this UpdateState state, string user, DateTime date)
-        {
-            state.At = date;
-            state.By = user;
         }
     }
 }

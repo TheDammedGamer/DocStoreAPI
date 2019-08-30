@@ -5,7 +5,7 @@ using System.Net;
 using System.Security;
 using System.Threading.Tasks;
 
-namespace DocStoreAPI.Models.Stor
+namespace DocStore.API.Models.Stor
 {
     public class FileShareStorConfig : IStorConfig
     {

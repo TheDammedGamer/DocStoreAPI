@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DocStoreAPI.Shared
+namespace DocStore.API.Shared
 {
     public class ReaderExtension
     {

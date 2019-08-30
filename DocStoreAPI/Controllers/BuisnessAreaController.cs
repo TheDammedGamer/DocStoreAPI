@@ -4,11 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using DocStoreAPI.Models;
-using DocStoreAPI.Repositories;
+using DocStore.API.Models;
+using DocStore.API.Repositories;
+using DocStore.Shared.Models;
 using Microsoft.Extensions.Primitives;
 
-namespace DocStoreAPI.Controllers
+namespace DocStore.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

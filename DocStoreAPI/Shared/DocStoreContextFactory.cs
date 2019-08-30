@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DocStoreAPI.Models;
+using DocStore.API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-namespace DocStoreAPI.Shared 
+namespace DocStore.API.Shared 
 {
     public class DocStoreContextFactory : IDesignTimeDbContextFactory<DocStoreContext>
     {
