@@ -12,10 +12,12 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.0.0" />
+    <PackageReference Include="RabbitMQ.Client" Version="5.1.2" />
     <PackageReference Include="RulesEngine" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DocStore.Server\DocStore.Server.csproj" />
     <ProjectReference Include="..\DocStore.Shared\DocStore.Shared.csproj" />
   </ItemGroup>
 </Project>
