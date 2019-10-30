@@ -40,8 +40,7 @@ namespace DocStore.API.Controllers
             if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Return, buisnessArea))
                 return _securityRepository.GateUnathorised(currentUser, AccessLogAction.DocumentMetadataSearch, "Metadata", buisnessArea);
 
-            int pageCount = 0;
-
+            int pageCount;
             List<MetadataEntity> metaItems = _metadataRepository.ListByBuisnessArea(buisnessArea, page, perPage, out pageCount, getAll: getAll);
 
             if (metaItems.Count == 0)

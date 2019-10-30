@@ -33,8 +33,7 @@ namespace DocStore.API.Controllers
             if (!_securityRepository.UserIsAdmin(HttpContext))
                 return _securityRepository.GateUnathorised(currentUser, AccessLogAction.BAList, _objectType, string.Empty);
 
-            int pageCount = 0;
-
+            int pageCount;
             var buisnessAreas = _buisnessAreaRepository.ListP(out pageCount, perPage, page);
 
             if (buisnessAreas.Count() == 0)
