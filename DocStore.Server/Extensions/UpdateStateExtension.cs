@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DocStore.API.Extensions
+namespace DocStore.Server.Extensions
 {
     public static class UpdateStateExtension
     {

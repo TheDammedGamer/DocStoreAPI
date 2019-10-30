@@ -13,13 +13,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Server.HttpSys;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication;
-using DocStore.API.Models;
-using DocStore.API.Models.Stor;
-using DocStore.API.Repositories;
+using DocStore.Server.Models;
+using DocStore.Server.Models.Stor;
+using DocStore.Server.Repositories;
 
 namespace DocStore.API
 {
@@ -48,7 +49,7 @@ namespace DocStore.API
             services.AddScoped<AccessRepository>();
             services.AddScoped<BuisnessAreaRepository>();
             services.AddLogging(configure => configure.AddEventSourceLogger());
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             services.AddAuthentication(authOptions =>
             {
                 authOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -96,7 +97,7 @@ namespace DocStore.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -107,8 +108,13 @@ namespace DocStore.API
                 app.UseHsts();
                 app.UseHttpsRedirection();
             }
+
+            app.UseRouting();
             app.UseAuthentication();
-            app.UseMvc();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿// Refence From Here https://github.com/Azure-Samples/active-directory-dotnet-webapp-webapi-openidconnect-aspnetcore/blob/master/TodoListService/Extensions/AzureAdAuthenticationBuilderExtensions.cs
 
 using System;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

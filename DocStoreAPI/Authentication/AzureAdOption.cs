@@ -1,5 +1,5 @@
 ﻿//Reference from here: https://github.com/Azure-Samples/active-directory-dotnet-webapp-webapi-openidconnect-aspnetcore/blob/master/TodoListService/Extensions/AzureAdOptions.cs
-
+using System;
 namespace Microsoft.AspNetCore.Authentication
 {
     public class AzureAdOptions

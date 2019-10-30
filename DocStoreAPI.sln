@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocStoreAPI", "DocStoreAPI\DocStoreAPI.csproj", "{EC4A9741-96F8-4659-8D61-2FE0630B73D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocStore.API", "DocStoreAPI\DocStore.API.csproj", "{EC4A9741-96F8-4659-8D61-2FE0630B73D9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{33AA6529-FF5A-40CB-8051-C7225DDC64E7}"
 	ProjectSection(SolutionItems) = preProject
@@ -14,9 +14,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocStore.Shared", "DocStore.Shared\DocStore.Shared.csproj", "{9F5AC8BB-700A-4011-A15B-E688B4C8AB96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocStore.Shared", "DocStore.Shared\DocStore.Shared.csproj", "{9F5AC8BB-700A-4011-A15B-E688B4C8AB96}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocStore.Client", "DocStore.Client\DocStore.Client.csproj", "{E04A952D-63F9-468A-9BA6-F6112C4D7109}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocStore.Client", "DocStore.Client\DocStore.Client.csproj", "{E04A952D-63F9-468A-9BA6-F6112C4D7109}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocStore.Worker", "DocStore.Worker\DocStore.Worker.csproj", "{9D84C22E-14AA-4DE2-A9FE-212944770325}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocStore.Server", "DocStore.Server\DocStore.Server.csproj", "{DBA75418-4141-4BA0-AC4D-BE93CEA0A089}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,6 +40,14 @@ Global
 		{E04A952D-63F9-468A-9BA6-F6112C4D7109}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E04A952D-63F9-468A-9BA6-F6112C4D7109}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E04A952D-63F9-468A-9BA6-F6112C4D7109}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D84C22E-14AA-4DE2-A9FE-212944770325}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D84C22E-14AA-4DE2-A9FE-212944770325}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D84C22E-14AA-4DE2-A9FE-212944770325}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D84C22E-14AA-4DE2-A9FE-212944770325}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBA75418-4141-4BA0-AC4D-BE93CEA0A089}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBA75418-4141-4BA0-AC4D-BE93CEA0A089}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBA75418-4141-4BA0-AC4D-BE93CEA0A089}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBA75418-4141-4BA0-AC4D-BE93CEA0A089}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

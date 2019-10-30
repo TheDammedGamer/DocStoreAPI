@@ -1,14 +1,14 @@
-﻿using DocStore.API.Models;
+﻿using DocStore.Server.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using DocStore.API.Repositories;
+using DocStore.Server.Repositories;
 using DocStore.Shared.Models;
 
-namespace DocStore.API.Repositories
+namespace DocStore.Server.Repositories
 {
     public class GroupRepository : BaseRepository
     {

@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DocStore.API.Models;
+using DocStore.Server.Models;
 using DocStore.Shared.Models;
 
-namespace DocStore.API.Repositories
+namespace DocStore.Server.Repositories
 {
     public class BaseRepository
     {

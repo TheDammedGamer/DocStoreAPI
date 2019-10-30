@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DocStore.API.Repositories;
-using DocStore.API.Models;
-using DocStore.API.Extensions;
+using DocStore.Server.Repositories;
+using DocStore.Server.Models;
+using DocStore.Server.Extensions;
 using DocStore.Shared.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

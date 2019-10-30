@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DocStore.API.Shared;
+using DocStore.Server.Shared;
 using DocStore.Shared.Models;
 
-namespace DocStore.API.Models
+namespace DocStore.Server.Models
 {
     public class DocStoreContext : DbContext
     {

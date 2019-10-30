@@ -4,16 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using DocStore.API.Models;
-using DocStore.API.Repositories;
+using DocStore.Server.Models;
+using DocStore.Server.Repositories;
 using DocStore.Shared.Models;
 using Microsoft.Extensions.Primitives;
 
 namespace DocStore.API.Controllers
 {
-
     //TODO: Add Checks for Admin
-
     [Route("api/[controller]")]
     [ApiController]
     public class GroupController : ControllerBase
