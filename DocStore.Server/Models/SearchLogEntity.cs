@@ -20,10 +20,10 @@ namespace DocStore.Server.Models
 
         }
 
-        public SearchLogEntity(string user, string buisnessArea, BuisnessMetadataSearch search)
+        public SearchLogEntity(string user, MetadataSearch search)
         {
-            this.User = user ?? throw new ArgumentNullException(nameof(user));
-            this.TargetBuisnessArea = buisnessArea;
+            this.User = user; 
+            this.TargetBuisnessArea = search.BusinessArea;
             this.LoggedAt = DateTime.UtcNow;
             this.SearchPerformed = JsonConvert.SerializeObject(search);
         }

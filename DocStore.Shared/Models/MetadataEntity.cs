@@ -24,6 +24,7 @@ namespace DocStore.Shared.Models
         public string BuisnessArea { get; set; }
 
         public List<BuisnessMetadata> BuisnessMetadata { get; set; }
+        public Dictionary<string, string> Metadata { get; set; }
         public List<DocumentVersionEntity> Versions { get; set; }
 
         [Required]
@@ -51,6 +52,7 @@ namespace DocStore.Shared.Models
             this.StorName = storName;
             this.BuisnessMetadata = new List<BuisnessMetadata>();
             this.Versions = new List<DocumentVersionEntity>();
+            this.Metadata = new Dictionary<string, string>();
             this.Locked = new LockState();
             this.Archive = new ArchiveState();
             this.LastUpdate = new UpdateState(userName);
@@ -80,6 +82,41 @@ namespace DocStore.Shared.Models
 
             //Should be enough to compare equity
             return Version.Equals(other.Version) && Name.Equals(other.Name) && StorName.Equals(other.StorName) && Extension.Equals(other.Extension) && BuisnessArea.Equals(other.BuisnessArea) && BuisnessMetadata.Equals(other.BuisnessMetadata) && Created.Equals(other.Created);
+        }
+
+        public bool ContainsMetadata(string cKey, string cValue)
+        {
+            if (string.IsNullOrWhiteSpace(cKey))
+                throw new Exception("Comparison Key is null, empty or whitespace");
+            if (string.IsNullOrWhiteSpace(cValue))
+                throw new Exception("Comparison Value is null, empty or whitespace");
+
+            if (Metadata[cKey] == cValue)
+                return true;
+            else
+                return false;
+        }
+        
+        public bool ContainsMetadataKey(string cKey)
+        {
+            if (string.IsNullOrWhiteSpace(cKey))
+                throw new Exception("Comparison Key is null, empty or whitespace");
+
+            if (Metadata.ContainsKey(cKey))
+                return true;
+            else
+                return false;
+        }
+        
+        public bool ContainsMetadataValue(string cValue)
+        {
+            if (string.IsNullOrWhiteSpace(cValue))
+                throw new Exception("Comparison Value is null, empty or whitespace");
+
+            if (Metadata.ContainsValue(cValue))
+                return true;
+            else
+                return false;
         }
 
         public bool ContainsBuisnessMetadataKeyValue(string cKey, string cValue)

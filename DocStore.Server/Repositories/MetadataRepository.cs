@@ -76,18 +76,10 @@ namespace DocStore.Server.Repositories
         public IEnumerable<MetadataEntity> List(bool includeArchive = false)
         {
             if (includeArchive)
-            {
-                return _context.MetadataEntities
-                .Include(m => m.BuisnessMetadata)
-                .AsEnumerable();
-            }
+                return _context.MetadataEntities.Include(m => m.BuisnessMetadata).AsEnumerable();
             else
-            {
-                return _context.MetadataEntities
-                .Where(meta => !meta.Archive.Is)
-                .Include(m => m.BuisnessMetadata)
-                .AsEnumerable();
-            }
+                return _context.MetadataEntities.Where(meta => !meta.Archive.Is).Include(m => m.BuisnessMetadata).AsEnumerable();
+            
         }
         public List<MetadataEntity> ListByBuisnessArea(string buisnessArea, int page, int perPage, out int totalPages, bool includeArchive = false, bool includeOldVersions = false, bool getAll = false)
         {
@@ -97,9 +89,8 @@ namespace DocStore.Server.Repositories
                 return ListByBuisnessAreaAll(buisnessArea, includeArchive, includeOldVersions);
             }
             else
-            {
                 return ListByBuisnessAreaPaged(buisnessArea, page, perPage, out totalPages, includeArchive, includeOldVersions);
-            }
+            
         }
 
         private List<MetadataEntity> ListByBuisnessAreaAll(string buisnessArea, bool includeArchive, bool includeOldVersions)
@@ -157,43 +148,77 @@ namespace DocStore.Server.Repositories
             return entities.AsEnumerable();
         }
 
-        public IEnumerable<MetadataEntity> SearchByCustomMetadataKey(string key, string value)
+        public List<MetadataEntity> SearchByMetadataSearch(MetadataSearch search, bool incArchive)
         {
-            return _context.MetadataEntities.Where(meta =>
-                meta.BuisnessMetadata
-                    .Any(cm => cm.Key == key && cm.Value == value) && !meta.Archive.Is)
-                .Include(m => m.BuisnessMetadata)
-                .AsEnumerable();
-        }
+            var searchContext = _context.MetadataEntities.AsQueryable().Where(gg => gg.BuisnessArea == search.BusinessArea && gg.Archive.Is == incArchive);
 
-        //TODO: Sort this shit out to use BuisnessMetadata instead of CustomMetadata
-        public IEnumerable<MetadataEntity> SearchByCustomMetadataKeys(List<string> keys, List<string> values)
-        {
-            if (keys.Count() != values.Count())
-                throw new ArgumentException("arguments are not equal");
+            List<MetadataEntity> results = new List<MetadataEntity>();
 
-            IQueryable<BuisnessMetadata> query1 = _context.BuisnessMetadata.Where(bm => string.IsNullOrWhiteSpace(bm.Key));
-
-            List<BuisnessMetadata> query1Results = new List<BuisnessMetadata>();
-            List<BuisnessMetadata> query2Results = new List<BuisnessMetadata>();
-
-            query1Results = query1.Where(bm => keys.Contains(bm.Key)).ToList();
-
-            for (int i = 0; i < keys.Count(); i++)
+            foreach (var item in search.Search)
             {
-                query2Results.AddRange(query1Results.Where(bm => bm.Key == keys[i] && bm.Value == values[i]).ToList());
+                switch (item.Type)
+                {
+                    case "AllKeys":
+                        {
+                            var keys = (SearchAllKeys)item;
+                            var tmp = searchContext.Where(gg => gg.Metadata.ContainsValue(keys.Value)).ToList();
+                            if (search.Joiner == SearchJoin.And)
+                                results.AddRange(tmp);
+                            else
+                            {
+                                if (results.Count >= 1)
+                                    results.AddRange(tmp);
+                                else
+                                    results.RemoveAll(it => tmp.Contains(it));
+                            }
+                            break;
+                        }
+                    case "Equality":
+                        {
+                            var keys = (SearchEquality)item;
+                            List<MetadataEntity> entities = new List<MetadataEntity>();
+                            if (keys.Invert)
+                                entities.AddRange(searchContext.Where(gg => gg.Metadata[keys.Key] != keys.Value).ToList());
+                            else
+                                entities.AddRange(searchContext.Where(gg => gg.Metadata[keys.Key] == keys.Value).ToList());
+
+                            if (search.Joiner == SearchJoin.And)
+                                results.AddRange(entities);
+                            else
+                            {
+                                if (results.Count >= 1)
+                                    results.AddRange(entities);
+                                else
+                                    results.RemoveAll(it => entities.Contains(it));
+                            }
+                            break;
+                        }
+                    case "Present":
+                        {
+                            var keys = (SearchPresent)item;
+                            List<MetadataEntity> entities = new List<MetadataEntity>();
+                            if (keys.Invert)
+                                entities.AddRange(searchContext.Where(gg => gg.Metadata.ContainsKey(keys.Key) == false).ToList());
+                            else
+                                entities.AddRange(searchContext.Where(gg => gg.Metadata.ContainsKey(keys.Key)).ToList());
+
+                            if (search.Joiner == SearchJoin.And)
+                                results.AddRange(entities);
+                            else
+                            {
+                                if (results.Count >= 1)
+                                    results.AddRange(entities);
+                                else
+                                    results.RemoveAll(it => entities.Contains(it));
+                            }
+                            break;
+                        }
+                    default:
+                        throw new Exception("Unable to read Input SearchType");
+                }
             }
 
-            List<MetadataEntity> metaResults = new List<MetadataEntity>();
-
-            foreach (var item in query2Results)
-            {
-                var metaItem = _context.MetadataEntities.FirstOrDefault(me => me.Id == item.DocumentId);
-                if (!string.IsNullOrEmpty(metaItem.Name))
-                    metaResults.Add(metaItem);
-            }
-
-            return metaResults;
+            return results;
         }
 
         public bool TryLockDocument(ref MetadataEntity entity, HttpContext context, TimeSpan? duration = null)
@@ -325,107 +350,6 @@ namespace DocStore.Server.Repositories
             }
 
             return entityOriginal;
-        }
-
-        public List<MetadataEntity> SearchByBuisnessMetadata(BuisnessMetadataSearch search, bool incArchive)
-        {
-            List<MetadataEntity> results = new List<MetadataEntity>();
-            List<int> documentIds = new List<int>();
-
-            foreach (var searchItem in search.Search)
-            {
-                switch (searchItem.Type)
-                {
-                    case "Equality":
-                        {
-                            var item = (SearchEquality)searchItem;
-
-                            List<int> docIds = new List<int>();
-
-                            var query = _context.MetadataEntities.Where(qe => qe.BuisnessArea == search.BusinessArea);
-
-                            if (item.Invert)
-                            {
-                                //Not Equal Search
-                                var bms = _context.BuisnessMetadata.Where(bm => bm.Key == item.Key && bm.Value != item.Value);
-
-                                foreach (var buisnessMetadata in bms)
-                                    docIds.Add(buisnessMetadata.DocumentId);
-                            }
-                            else
-                            {
-                                // Equals search
-                                var bms = _context.BuisnessMetadata.Where(bm => bm.Key == item.Key && bm.Value == item.Value);
-
-                                foreach (var buisnessMetadata in bms)
-                                    docIds.Add(buisnessMetadata.DocumentId);
-                            }
-
-                            SearchByBuisnessMetadataResults(docIds, search.Joiner, search.BusinessArea, ref results);
-
-                            break;
-                        }
-                    case "Present":
-                        {
-                            var item = (SearchPresent)searchItem;
-
-                            List<int> docIds = new List<int>();
-
-                            if (item.Invert)
-                            {
-                                //Is Not Present
-                                var bms = _context.BuisnessMetadata.Where(bm => bm.Key == item.Key && string.IsNullOrEmpty(bm.Value));
-
-                                foreach (var buisnessMetadata in bms)
-                                    docIds.Add(buisnessMetadata.DocumentId);
-                            }
-                            else
-                            {
-                                //Is Present
-                                var bms = _context.BuisnessMetadata.Where(bm => bm.Key == item.Key && !string.IsNullOrEmpty(bm.Value));
-
-                                foreach (var buisnessMetadata in bms)
-                                    docIds.Add(buisnessMetadata.DocumentId);
-                            }
-
-                            SearchByBuisnessMetadataResults(docIds, search.Joiner, search.BusinessArea, ref results);
-                            break;
-                        }
-                    case "AllKeys":
-                        {
-                            var item = (SearchAllKeys)searchItem;
-
-                            List<int> docIds = new List<int>();
-
-                            var bms =_context.BuisnessMetadata.Where(bm => bm.Value == item.Value).ToList();
-
-                            foreach (var buisnessMetadata in bms)
-                                docIds.Add(buisnessMetadata.DocumentId);
-
-
-                            SearchByBuisnessMetadataResults(docIds, search.Joiner, search.BusinessArea, ref results);
-
-                            break;
-                        }
-                    default:
-
-                        break;
-                }
-            }
-
-            return results.Distinct().Where(me => me.Archive.Is == incArchive).ToList();
-        }
-        private void SearchByBuisnessMetadataResults(List<int> docIds, SearchJoin joinType, string BuisnessArea, ref List<MetadataEntity> currentResults)
-        {
-            if (joinType == SearchJoin.And)
-            {
-                if (currentResults.Count > 0)
-                    currentResults = currentResults.Where(res => docIds.Contains(res.Id)).ToList(); //filter current results
-                else
-                    currentResults.AddRange(_context.MetadataEntities.Where(meta => meta.BuisnessArea == BuisnessArea  && docIds.Contains(meta.Id)).ToList());
-            }
-            else
-                currentResults.AddRange(_context.MetadataEntities.Where(meta => meta.BuisnessArea == BuisnessArea && docIds.Contains(meta.Id)).ToList());
         }
     }
 }

@@ -27,12 +27,13 @@ namespace DocStore.Worker.Services
         {
             _logger = logger;
 
+            _factory = new ConnectionFactory();
+
             try
             {
                 var queueConfig = config.GetSection("RabbitMQ");
                 var _factory = new ConnectionFactory()
                 {
-                    // This is my side of the configuration, you can use it yourself.
                     HostName = queueConfig.GetValue<string>("HostName"),
                     UserName = queueConfig.GetValue<string>("Username"),
                     Password = queueConfig.GetValue<string>("Password"),

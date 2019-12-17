@@ -78,23 +78,24 @@ namespace DocStore.API.Controllers
         }
 
         //Actual Result is List<MetadataEntity>
-        // PUT: api/DocumentMetadata/Search?incArchive=false
+        // PUT: api/DocumentMetadata/Search?incArchive=true
+        // PUT: api/DocumentMetadata/Search
         [HttpPut("/Search", Name = "Search")]
-        public IActionResult Search( [FromBody]BuisnessMetadataSearch currentSearch, [FromQuery] bool incArchive = false)
+        public IActionResult Search([FromBody]MetadataSearch search, [FromQuery] bool incArchive = false)
         {
             string currentUser = HttpContext.User.Identity.Name;
 
-            if (currentSearch == null)
-                return _securityRepository.GateNotFound(currentUser, AccessLogAction.DocumentMetadataSearch, "Metadata", currentSearch.BusinessArea);
+            if (search == null)
+                return _securityRepository.GateNotFound(currentUser, AccessLogAction.DocumentMetadataSearch, "Metadata", search.BusinessArea);
 
-            if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Return, currentSearch.BusinessArea))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.DocumentMetadataSearch, "Metadata", currentSearch.BusinessArea);
+            if (!_securityRepository.UserIsAuthorisedByBuisnessAreas(HttpContext, AuthActions.Return, search.BusinessArea))
+                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.DocumentMetadataSearch, "Metadata", search.BusinessArea);
 
-            var result = _metadataRepository.SearchByBuisnessMetadata(currentSearch, incArchive);
+            var result = _metadataRepository.SearchByMetadataSearch(search, incArchive);
 
-            _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentMetadataSearch, currentSearch.BusinessArea, "Metadata", true);
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentMetadataSearch, search.BusinessArea, "Metadata", true);
 
-            _securityRepository.LogUserSearch(currentUser, currentSearch.BusinessArea, currentSearch);
+            _securityRepository.LogUserSearch(currentUser, search);
 
             _securityRepository.SaveChanges();
 

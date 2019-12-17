@@ -50,9 +50,9 @@ namespace DocStore.Server.Repositories
         {
             _context.AccessLogEntities.Add(new AccessLogEntity(context.User.Identity.Name, actionId, targetId, targetType, success));
         }
-        public void LogUserSearch(string user, string BuisnessArea, BuisnessMetadataSearch search)
+        public void LogUserSearch(string user, MetadataSearch search)
         {
-            _context.SearchLogs.Add(new SearchLogEntity(user, BuisnessArea, search));
+            _context.SearchLogs.Add(new SearchLogEntity(user, search));
         }
 
 
@@ -130,25 +130,10 @@ namespace DocStore.Server.Repositories
                         return true;
                 }
             }
-
-            //Check if User is Admin
-            if (context.User.Identity.AuthenticationType == "Windows")
-            {
-                foreach (var item in _admins.ADAdminGroupNames)
-                {
-                    if (context.User.IsInRole(item))
-                        return true;
-                }
-            }
+            if (UserIsAdmin(context))
+                return true;
             else
-            {
-                foreach (var item in _admins.AZAdminGroupNames)
-                {
-                    if (context.User.IsInRole(item))
-                        return true;
-                }
-            }
-            return false;
+                return false;
         }
 
         public IActionResult GateUnathorised(string username, AccessLogAction ala, string objectType, string objectValue)
@@ -162,7 +147,7 @@ namespace DocStore.Server.Repositories
         public IActionResult GateNotFound(string username, AccessLogAction ala, string objectType, string objectValue)
         {
             LogUserAction(username, ala, objectValue, objectType, false);
-            _logger.LogInformation((int)ala, "Failed to find {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            _logger.LogInformation((int)ala, "Failed to find '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
             SaveChanges();
             return new NotFoundObjectResult(objectValue);
         }
@@ -170,14 +155,14 @@ namespace DocStore.Server.Repositories
         public IActionResult GateCannotLock(string username, string objectType, string objectValue)
         {
             LogUserAction(username, AccessLogAction.DocumentLocked, objectValue, objectType, false);
-            _logger.LogInformation((int)AccessLogAction.DocumentLocked, "Failed to lock {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            _logger.LogInformation((int)AccessLogAction.DocumentLocked, "Failed to lock '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
             SaveChanges();
             return new UnauthorizedResult();
         }
         public IActionResult GateCannotUnlock(string username, string objectType, string objectValue)
         {
             LogUserAction(username, AccessLogAction.DocumentUnlocked, objectValue, objectType, false);
-            _logger.LogInformation((int)AccessLogAction.DocumentUnlocked, "Failed to unlock {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            _logger.LogInformation((int)AccessLogAction.DocumentUnlocked, "Failed to unlock '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
             SaveChanges();
             return new UnauthorizedResult();
         }
@@ -185,7 +170,7 @@ namespace DocStore.Server.Repositories
         public IActionResult GateDocumentLockedByAnotherUser(string username, string objectType, string objectValue)
         {
             LogUserAction(username, AccessLogAction.DocumentUpdate, objectValue, objectType, false);
-            _logger.LogInformation((int)AccessLogAction.DocumentUpdate, "Failed to update {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            _logger.LogInformation((int)AccessLogAction.DocumentUpdate, "Failed to update '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
             SaveChanges();
 
             var res = new ContentResult
@@ -197,5 +182,51 @@ namespace DocStore.Server.Repositories
 
             return res;
         }
+
+        public IActionResult Gate(GateType gate, AccessLogAction logAction, string username, string objectType, string objectValue)
+        {
+            switch (gate)
+            {
+                case GateType.DocumentLockedByAnotherUser:
+                    LogUserAction(username, logAction, objectValue, objectType, false);
+                    SaveChanges();
+
+                    var res = new ContentResult
+                    {
+                        StatusCode = 409,
+                        ContentType = "text/plain",
+                        Content = "Document is Locked by another User"
+                    };
+
+                    return res;
+                case GateType.CannotLock:
+                    LogUserAction(username, logAction, objectValue, objectType, false);
+                    SaveChanges();
+                    return new UnauthorizedResult();
+                case GateType.CannotUnlock:
+                    LogUserAction(username, logAction, objectValue, objectType, false);
+                    SaveChanges();
+                    return new UnauthorizedResult();
+                case GateType.NotFound:
+                    LogUserAction(username, logAction, objectValue, objectType, false);
+                    SaveChanges();
+                    return new NotFoundObjectResult(objectValue);
+                case GateType.Unathorised:
+                    LogUserAction(username, logAction, objectValue, objectType, false);
+                    SaveChanges();
+                    return new UnauthorizedResult();
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+    }
+
+    public enum GateType
+    {
+        DocumentLockedByAnotherUser,
+        CannotLock,
+        CannotUnlock,
+        NotFound,
+        Unathorised
     }
 }

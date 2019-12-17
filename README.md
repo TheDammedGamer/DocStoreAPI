@@ -18,7 +18,7 @@ The application stores documents within `stors` such as a file share or Azure Bl
 	- [x] Verify Post Data and strip Generated Data.
 - [x] Redifne the Gates on the group controller and remove the exception when the object is null.
 - [x] Update User Is authorised by Buisness Area to support Admins.
-- [ ] ~ Implement a Search by Custom Metadata Keys in `DocumentMetadataController` using `SearchByCustomMetadataKey`.~
+- [~] ~ Implement a Search by Custom Metadata Keys in `DocumentMetadataController` using `SearchByCustomMetadataKey`.~
 - [x] Implement a search.
 	- [x] Use a class passed as the body to store the search Data with Queries for the Pagination etc.
 - [x] Update `BuisnessArea` and `Group` conrtollers to search by strings not ids.
@@ -29,11 +29,20 @@ The application stores documents within `stors` such as a file share or Azure Bl
 	- [x] Split Shared Code to Class Library in DocStore.Shared.
 	- [x] Client Code in DocStore.Client.
 - [x] Update to .net core 3.
-- [ ] Change Buisness Metadata to Dictionary<string, TValue> instead of a custom class so it would be better.
+- [ ] Change Buisness Metadata to Dictionary<string, TValue> instead of a custom class so it would be easier to parse and add values to.
 - [ ] Add Unit Tests.
 - [ ] Add a Client library.
 - [ ] Add an example WPF app.
 - [ ] Implement a Background worker service as a different application
+	- [ ] Queue service
+		- Connects to RabbitMQ and recives messages from the API
+		- Runs actions on the other Services depending on the message(s) recived.
+	- [ ] Archival Service
+		- Doesn't do much now but will be usefull when policies are used as archival policies will be required
+	- [ ] Deletion Service
+		- Deletes all versions of a document alongside the Data in the DB.
+	- [ ] Document Moverment Service
+		- Deals with movement of data between data stores
 
 ### Version 2 improvements
 - Implement Background Worker and Queue to manage archival, deletion and movement of documents instead of at Runtime.
