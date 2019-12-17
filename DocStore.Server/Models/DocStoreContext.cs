@@ -30,47 +30,26 @@ namespace DocStore.Server.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<MetadataEntity>()
-                .HasKey(me => me.Id)
-                .IsClustered();
-            modelBuilder.Entity<MetadataEntity>()
-                .Property(me => me.Id)
-                .UseIdentityColumn();
-            modelBuilder.Entity<MetadataEntity>()
-                .Property(me => me.Name)
-                .HasMaxLength(100)
-                .IsRequired();
-            modelBuilder.Entity<MetadataEntity>()
-                .Property(me => me.StorName)
-                .HasMaxLength(20)
-                .IsRequired();
-            modelBuilder.Entity<MetadataEntity>()
-                .Property(me => me.Extension)
-                .HasMaxLength(10)
-                .IsRequired();
-            modelBuilder.Entity<MetadataEntity>()
-                .Property(me => me.BuisnessArea)
-                .HasMaxLength(20)
-                .IsUnicode(false)
-                .IsRequired();
+            modelBuilder.Entity<MetadataEntity>(me =>
+            {
+                me.HasKey("Id").IsClustered();
+                me.Property("Id").UseIdentityColumn();
 
-            modelBuilder.Entity<MetadataEntity>()
-                .OwnsOne(p => p.Locked);
-            modelBuilder.Entity<MetadataEntity>()
-                .OwnsOne(p => p.Archive);
-            modelBuilder.Entity<MetadataEntity>()
-                .OwnsOne(p => p.Created);
-            modelBuilder.Entity<MetadataEntity>()
-                .OwnsOne(p => p.LastUpdate);
+                me.Property("Name").HasMaxLength(100).IsRequired();
 
-            modelBuilder.Entity<MetadataEntity>()
-                .HasMany<BuisnessMetadata>(p => p.BuisnessMetadata)
-                .WithOne()
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<MetadataEntity>()
-                .HasMany<DocumentVersionEntity>(p => p.Versions)
-                .WithOne()
-                .OnDelete(DeleteBehavior.Cascade);
+                me.Property("StorName").HasMaxLength(20).IsRequired();
+
+                me.Property("Extension").HasMaxLength(10).IsRequired();
+
+                me.Property("BuisnessArea").HasMaxLength(20).IsUnicode(false).IsRequired();
+
+                me.OwnsOne(p => p.Locked);
+                me.OwnsOne(p => p.Archive);
+                me.OwnsOne(p => p.Created);
+                me.OwnsOne(p => p.LastUpdate);
+            });
+
+
 
             modelBuilder.Entity<LockState>()
                 .Property(ls => ls.By)

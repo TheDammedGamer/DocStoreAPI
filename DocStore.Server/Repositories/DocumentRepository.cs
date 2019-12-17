@@ -87,7 +87,7 @@ namespace DocStore.Server.Repositories
                 await origStor.RemoveFileAsync(fileName);
             }
             catch (Exception ex) {
-                throw new Exception("Unable to move document see inner excption", ex);
+                throw new Exception("Unable to move document", ex);
             }
         }
         public async Task MoveDocumentbyID(int id, string newStorProvider)

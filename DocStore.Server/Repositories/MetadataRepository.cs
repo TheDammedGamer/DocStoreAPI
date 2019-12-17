@@ -76,9 +76,9 @@ namespace DocStore.Server.Repositories
         public IEnumerable<MetadataEntity> List(bool includeArchive = false)
         {
             if (includeArchive)
-                return _context.MetadataEntities.Include(m => m.BuisnessMetadata).AsEnumerable();
+                return _context.MetadataEntities.AsEnumerable();
             else
-                return _context.MetadataEntities.Where(meta => !meta.Archive.Is).Include(m => m.BuisnessMetadata).AsEnumerable();
+                return _context.MetadataEntities.Where(meta => !meta.Archive.Is).AsEnumerable();
             
         }
         public List<MetadataEntity> ListByBuisnessArea(string buisnessArea, int page, int perPage, out int totalPages, bool includeArchive = false, bool includeOldVersions = false, bool getAll = false)
@@ -101,7 +101,6 @@ namespace DocStore.Server.Repositories
             if (!includeArchive)
                 entities = entities.Where(m => !m.Archive.Is);
 
-            entities = entities.Include(m => m.BuisnessMetadata);
             if (includeOldVersions)
                 entities = entities.Include(m => m.Versions);
 
@@ -116,7 +115,6 @@ namespace DocStore.Server.Repositories
             if (!includeArchive)
                 entities = entities.Where(m => !m.Archive.Is);
 
-            entities = entities.Include(m => m.BuisnessMetadata);
             if (includeOldVersions)
                 entities = entities.Include(m => m.Versions);
 
@@ -141,7 +139,6 @@ namespace DocStore.Server.Repositories
             if (!includeArchive)
                 entities = entities.Where(m => !m.Archive.Is);
 
-            entities = entities.Include(m => m.BuisnessMetadata);
             if (includeOldVersions)
                 entities = entities.Include(m => m.Versions);
 
@@ -287,7 +284,6 @@ namespace DocStore.Server.Repositories
                             throw new ArgumentException("Id can not be set on client", "Id");
                         break;
                     default:
-                        //not too fussed about the rest of the properties as theese are designed to be set by user.
                         break;
                 }
             }
@@ -327,9 +323,9 @@ namespace DocStore.Server.Repositories
                             changed = true;
                             entityOriginal.BuisnessArea = entity.BuisnessArea;
                             break;
-                        case "BuisnessMetadata":
+                        case "Metadata":
                             changed = true;
-                            entityOriginal.BuisnessMetadata = entity.BuisnessMetadata;
+                            entityOriginal.Metadata = entity.Metadata;
                             break;
                         default:
                             break;
