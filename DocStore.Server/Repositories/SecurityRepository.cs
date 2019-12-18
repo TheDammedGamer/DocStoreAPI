@@ -84,31 +84,35 @@ namespace DocStore.Server.Repositories
 
             List<AccessControlEntity> aces = new List<AccessControlEntity>();
 
+            var query = _context.AcessControlEntity.AsQueryable();
+
             foreach (var ba in buisnessArea)
             {
-                aces.AddRange(GetACEByBA(ba));
-            }
+                var tmpquery = query.Where(bac => bac.BusinessArea == ba);
 
-            switch (action)
-            {
-                case AuthActions.Create:
-                    aces = aces.Where(ace => ace.Create).ToList();
-                    break;
-                case AuthActions.Return:
-                    aces = aces.Where(ace => ace.Return).ToList();
-                    break;
-                case AuthActions.Update:
-                    aces = aces.Where(ace => ace.Update).ToList();
-                    break;
-                case AuthActions.Delete:
-                    aces = aces.Where(ace => ace.Delete).ToList();
-                    break;
-                case AuthActions.Archive:
-                    aces = aces.Where(ace => ace.Archive).ToList();
-                    break;
-                case AuthActions.Supervisor:
-                    aces = aces.Where(ace => ace.Supervisor).ToList();
-                    break;
+                switch (action)
+                {
+                    case AuthActions.Create:
+                        tmpquery = tmpquery.Where(ace => ace.Create);
+                        break;
+                    case AuthActions.Return:
+                        tmpquery = tmpquery.Where(ace => ace.Return);
+                        break;
+                    case AuthActions.Update:
+                        tmpquery = tmpquery.Where(ace => ace.Update);
+                        break;
+                    case AuthActions.Delete:
+                        tmpquery = tmpquery.Where(ace => ace.Delete);
+                        break;
+                    case AuthActions.Archive:
+                        tmpquery = tmpquery.Where(ace => ace.Archive);
+                        break;
+                    case AuthActions.Supervisor:
+                        tmpquery = tmpquery.Where(ace => ace.Supervisor);
+                        break;
+                }
+
+                aces.AddRange(tmpquery.ToList());
             }
 
             if (aces.Count == 0)
@@ -139,7 +143,7 @@ namespace DocStore.Server.Repositories
         public IActionResult GateUnathorised(string username, AccessLogAction ala, string objectType, string objectValue)
         {
             LogUserAction(username, ala, objectValue, objectType, false);
-            _logger.LogInformation((int)ala, "Unathorised to access {0} with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            _logger.LogDebug((int)ala, "Unathorised to access '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
             SaveChanges();
             return new UnauthorizedResult();
         }
@@ -147,7 +151,7 @@ namespace DocStore.Server.Repositories
         public IActionResult GateNotFound(string username, AccessLogAction ala, string objectType, string objectValue)
         {
             LogUserAction(username, ala, objectValue, objectType, false);
-            _logger.LogInformation((int)ala, "Failed to find '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            _logger.LogDebug((int)ala, "Failed to find '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
             SaveChanges();
             return new NotFoundObjectResult(objectValue);
         }
@@ -155,14 +159,14 @@ namespace DocStore.Server.Repositories
         public IActionResult GateCannotLock(string username, string objectType, string objectValue)
         {
             LogUserAction(username, AccessLogAction.DocumentLocked, objectValue, objectType, false);
-            _logger.LogInformation((int)AccessLogAction.DocumentLocked, "Failed to lock '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            _logger.LogDebug((int)AccessLogAction.DocumentLocked, "Failed to lock '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
             SaveChanges();
             return new UnauthorizedResult();
         }
         public IActionResult GateCannotUnlock(string username, string objectType, string objectValue)
         {
             LogUserAction(username, AccessLogAction.DocumentUnlocked, objectValue, objectType, false);
-            _logger.LogInformation((int)AccessLogAction.DocumentUnlocked, "Failed to unlock '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            _logger.LogDebug((int)AccessLogAction.DocumentUnlocked, "Failed to unlock '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
             SaveChanges();
             return new UnauthorizedResult();
         }
@@ -170,7 +174,7 @@ namespace DocStore.Server.Repositories
         public IActionResult GateDocumentLockedByAnotherUser(string username, string objectType, string objectValue)
         {
             LogUserAction(username, AccessLogAction.DocumentUpdate, objectValue, objectType, false);
-            _logger.LogInformation((int)AccessLogAction.DocumentUpdate, "Failed to update '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
+            _logger.LogDebug((int)AccessLogAction.DocumentUpdate, "Failed to update '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
             SaveChanges();
 
             var res = new ContentResult
@@ -187,10 +191,10 @@ namespace DocStore.Server.Repositories
         {
             switch (gate)
             {
-                case GateType.DocumentLockedByAnotherUser:
+                case GateType.LockedByAnotherUser:
                     LogUserAction(username, logAction, objectValue, objectType, false);
                     SaveChanges();
-
+                    _logger.LogDebug((int)logAction, "Failed to update '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
                     var res = new ContentResult
                     {
                         StatusCode = 409,
@@ -202,18 +206,22 @@ namespace DocStore.Server.Repositories
                 case GateType.CannotLock:
                     LogUserAction(username, logAction, objectValue, objectType, false);
                     SaveChanges();
+                    _logger.LogDebug((int)logAction, "Failed to lock '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
                     return new UnauthorizedResult();
                 case GateType.CannotUnlock:
                     LogUserAction(username, logAction, objectValue, objectType, false);
                     SaveChanges();
+                    _logger.LogDebug((int)logAction, "Failed to unlock '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
                     return new UnauthorizedResult();
                 case GateType.NotFound:
                     LogUserAction(username, logAction, objectValue, objectType, false);
                     SaveChanges();
+                    _logger.LogDebug((int)logAction, "Failed to find '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
                     return new NotFoundObjectResult(objectValue);
                 case GateType.Unathorised:
                     LogUserAction(username, logAction, objectValue, objectType, false);
                     SaveChanges();
+                    _logger.LogDebug((int)logAction, "Unathorised to access '{0}' with identifier '{1}' for user '{2}'", objectType, objectValue, username);
                     return new UnauthorizedResult();
                 default:
                     throw new NotImplementedException();
@@ -223,7 +231,7 @@ namespace DocStore.Server.Repositories
 
     public enum GateType
     {
-        DocumentLockedByAnotherUser,
+        LockedByAnotherUser,
         CannotLock,
         CannotUnlock,
         NotFound,

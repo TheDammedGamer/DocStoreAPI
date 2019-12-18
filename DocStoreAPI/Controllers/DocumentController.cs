@@ -46,7 +46,7 @@ namespace DocStore.API.Controllers
 
             var doc = await _documentRepository.GetDocumentAsync(meta);
 
-            _logger.Log(LogLevel.Information, "Downloading Document {0} for User {1}", meta.Id, HttpContext.User.Identity.Name);
+            _logger.Log(LogLevel.Debug, "Downloading Document {0} for User {1}", meta.Id, HttpContext.User.Identity.Name);
             _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentRead, id, "Document", true);
 
             return Ok(doc);
@@ -69,7 +69,7 @@ namespace DocStore.API.Controllers
 
             await _documentRepository.SetDocumentAsync(meta, value);
 
-            _logger.Log(LogLevel.Information, "Uploaded New Document {0} for User {1}", meta.Id, HttpContext.User.Identity.Name);
+            _logger.Log(LogLevel.Debug, "Uploaded New Document {0} for User {1}", meta.Id, HttpContext.User.Identity.Name);
             _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentCreate, id, "Document", true);
 
             return Ok();
@@ -99,7 +99,7 @@ namespace DocStore.API.Controllers
 
             await _documentRepository.SetDocumentAsync(meta, value);
 
-            _logger.Log(LogLevel.Information, "Uploaded New Document Version {0} for User {1}", meta.Id, HttpContext.User.Identity.Name);
+            _logger.Log(LogLevel.Debug, "Uploaded New Document Version {0} for User {1}", meta.Id, HttpContext.User.Identity.Name);
             _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentUpdate, id, "Document", true);
 
             _metadataRepository.Edit(meta);
@@ -132,9 +132,9 @@ namespace DocStore.API.Controllers
 
             await _documentRepository.DeleteDocumentVersionAsync(oldVer);
 
-            _logger.Log(LogLevel.Information, "Document File:'{0}' Deleted By {1}", oldVer.GetServerFileName(), HttpContext.User.Identity.Name);
+            _logger.Log(LogLevel.Debug, "Document File:'{0}' Deleted By {1}", oldVer.GetServerFileName(), HttpContext.User.Identity.Name);
 
-            _logger.Log(LogLevel.Information, "Deleteing Document {0} Version {1} for User {2}", meta.Id, oldVer.Version, HttpContext.User.Identity.Name);
+            _logger.Log(LogLevel.Debug, "Deleteing Document {0} Version {1} for User {2}", meta.Id, oldVer.Version, HttpContext.User.Identity.Name);
 
             _metadataRepository.DeleteVersion(oldVer);
             _metadataRepository.SaveChanges();

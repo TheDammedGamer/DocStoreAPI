@@ -7,7 +7,7 @@ At it's core DocStoreAPI is a simple API designed to be easily intergratable wit
 The application stores documents within `stors` such as a file share or Azure Blob Storage, and then stores the document metadata within SQL Server. Buisness Metadata is stored as simple Key Value Pairs where as the document properties are stored in a flat structure.
 
 
-## To-Do (MVP)
+## To-Do
 - [x] Implement Move on `DocumentController`.
 - [x] Implement a Security Controller(s) to Manage `Groups`, `ACE`s and `BuisnessArea`s.
 - [x] Add ACE state of `Supervisor` to manage permissions by Buisness Area.
@@ -18,18 +18,22 @@ The application stores documents within `stors` such as a file share or Azure Bl
 	- [x] Verify Post Data and strip Generated Data.
 - [x] Redifne the Gates on the group controller and remove the exception when the object is null.
 - [x] Update User Is authorised by Buisness Area to support Admins.
-- [~] ~ Implement a Search by Custom Metadata Keys in `DocumentMetadataController` using `SearchByCustomMetadataKey`.~
 - [x] Implement a search.
 	- [x] Use a class passed as the body to store the search Data with Queries for the Pagination etc.
 - [x] Update `BuisnessArea` and `Group` conrtollers to search by strings not ids.
-- [ ] Go through and ensure that Auditing is being stored in the database not in logs.
-- [ ] Add more Logging on expections (Make sure they don't contain sensitive information).
+- [ ] Go through and ensure that Auditing is being stored in the database.
+- [ ] Change Gates to a Single Generic Method.
+	- [x] Access Controller
+	- [x] Buisness Area Controller
+	- [x] Group Controller
+	- [ ] Document Controller
+	- [ ] Document Metadata Controller
 - [x] Change Namespaces to >
 	- [x] WebApi to DocStore.API.
 	- [x] Split Shared Code to Class Library in DocStore.Shared.
 	- [x] Client Code in DocStore.Client.
 - [x] Update to .net core 3.
-- [ ] Change Buisness Metadata to Dictionary<string, TValue> instead of a custom class so it would be easier to parse and add values to.
+- [x] Change Buisness Metadata to Dictionary<string, TValue> instead of a custom class so it would be easier to parse and add values to.
 - [ ] Add Unit Tests.
 - [ ] Add a Client library.
 - [ ] Add an example WPF app.
@@ -52,8 +56,9 @@ The application stores documents within `stors` such as a file share or Azure Bl
 	- Use [Rules Engine](https://github.com/microsoft/RulesEngine) to implement polices.
 	- Store the Policies in SQL and make them managaeable through the Admin interface.
 - Add Support for MySql as an alternative database.
-- Add Support for Comsmos DB as an alternative database (requires .net core 3).
+- Add Support for Comsmos DB as an alternative database.
 - Look into Support for AWS storage.
+- Add support for Generic Oauth and move Azure to that auth.
 
 ### Possible Version 3 Improvements
 - Support for Metadata / Security caching possible using redis or something similar.

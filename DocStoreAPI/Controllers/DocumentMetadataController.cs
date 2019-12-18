@@ -124,7 +124,7 @@ namespace DocStore.API.Controllers
 
             _metadataRepository.Touch(ref item);
 
-            _logger.Log(LogLevel.Information, "DocumentMetadata {0} Locked By {1}", item.Id, currentUser);
+            _logger.Log(LogLevel.Debug, "DocumentMetadata {0} Locked By {1}", item.Id, currentUser);
             _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentLocked, item.Id.ToString(), "Metadata", true);
 
             _metadataRepository.SaveChanges();
@@ -153,7 +153,7 @@ namespace DocStore.API.Controllers
 
             _metadataRepository.Touch(ref item);
             
-            _logger.Log(LogLevel.Information, "DocumentMetadata {0} Locked By {1}", item.Id, currentUser);
+            _logger.Log(LogLevel.Debug, "DocumentMetadata {0} Locked By {1}", item.Id, currentUser);
             _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentUnlocked, item.Id.ToString(), "Metadata", true);
 
             _metadataRepository.SaveChanges();
@@ -171,8 +171,8 @@ namespace DocStore.API.Controllers
 
             _metadataRepository.AddNew(ref value, currentUser);
 
-            _logger.Log(LogLevel.Information, "DocumentMetadata {0} Created By {1}", value.Id, currentUser);
-            _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentMetadataCreate, value.Id.ToString(), "Metadata", true);
+            _logger.Log(LogLevel.Debug, "DocumentMetadata {0} Created By {1}", value.Id, currentUser);
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentMetadataCreate, value.Id, "Metadata", true);
 
             _metadataRepository.SaveChanges();
 
@@ -195,7 +195,7 @@ namespace DocStore.API.Controllers
 
             _metadataRepository.UserEdit(ref origItem, value, HttpContext);
 
-            _logger.Log(LogLevel.Information, "DocumentMetadata {0} Edited By {1}", origItem.Id, currentUser);
+            _logger.Log(LogLevel.Debug, "DocumentMetadata {0} Edited By {1}", origItem.Id, currentUser);
             _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentMetadataUpdate, origItem.Id.ToString(), "Metadata", true);
 
             _metadataRepository.SaveChanges();
@@ -220,16 +220,17 @@ namespace DocStore.API.Controllers
             foreach (var oldVer in origItem.Versions)
             {
                 await _documentRepository.DeleteDocumentVersionAsync(oldVer);
-                _logger.Log(LogLevel.Information, "Document File:'{0}' Deleted By {1}", oldVer.GetServerFileName(), currentUser);
+                _logger.Log(LogLevel.Debug, "Document File:'{0}' Deleted By {1}", oldVer.GetServerFileName(), currentUser);
+                _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentVersionDelete, oldVer.Id, "DocumentVersion", true);
             }
 
             await _documentRepository.DeleteDocumentAsync(origItem);
 
-            _logger.Log(LogLevel.Information, "Document File:'{0}' Deleted By {1}", origItem.GetServerFileName(), currentUser);
+            _logger.Log(LogLevel.Debug, "Document File:'{0}' Deleted By {1}", origItem.GetServerFileName(), currentUser);
 
             _metadataRepository.Delete(origItem);
 
-            _logger.Log(LogLevel.Information, "Document {0} Deleted By {1}", origItem.Id, currentUser);
+            _logger.Log(LogLevel.Debug, "Document {0} Deleted By {1}", origItem.Id, currentUser);
             _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentDelete, id, "Document", true);
 
             _metadataRepository.SaveChanges();
@@ -253,7 +254,7 @@ namespace DocStore.API.Controllers
 
             origItem.Archive.Archive(currentUser);
 
-            _logger.Log(LogLevel.Information, "Document {0} Archived By {1}", origItem.Id, currentUser);
+            _logger.Log(LogLevel.Debug, "Document {0} Archived By {1}", origItem.Id, currentUser);
             _securityRepository.LogUserAction(currentUser, AccessLogAction.DocumentArchive, id, "Document", true);
 
             _metadataRepository.Edit(origItem);

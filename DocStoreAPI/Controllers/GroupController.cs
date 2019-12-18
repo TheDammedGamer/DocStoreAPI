@@ -32,18 +32,16 @@ namespace DocStore.API.Controllers
         public IActionResult Get([FromQuery]int page = 0, [FromQuery] int perPage = 25)
         {
             var currentUser = HttpContext.User.Identity.Name;
-            if (_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.GroupList, _object, string.Empty);
-
+            if (!_securityRepository.UserIsAdmin(HttpContext))
+                return _securityRepository.Gate(GateType.Unathorised, AccessLogAction.GroupList, currentUser, _object, string.Empty);
 
             var groups = _groupRepository.ListP(out int pageCount, perPage, page);
 
             if (groups.Count() == 0)
-                return _securityRepository.GateNotFound(currentUser, AccessLogAction.GroupList, _object, string.Empty);
-
-            _securityRepository.LogUserAction(currentUser, AccessLogAction.GroupList, string.Empty, _object, true);
+                return _securityRepository.Gate(GateType.NotFound, AccessLogAction.GroupList, currentUser, _object, string.Empty);
 
             HttpContext.Response.Headers.Add(new KeyValuePair<string, StringValues>("TotalPages", pageCount.ToString()));
+            _securityRepository.LogUserAction(currentUser, AccessLogAction.GroupList, string.Empty, _object, true);
 
             return Ok(groups);
         }
@@ -54,13 +52,13 @@ namespace DocStore.API.Controllers
         {
             string currentUser = HttpContext.User.Identity.Name;
 
-            if (_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.GroupReturn, _object, name);
+            if (!_securityRepository.UserIsAdmin(HttpContext))
+                return _securityRepository.Gate(GateType.Unathorised, AccessLogAction.GroupReturn, currentUser, _object, name);
 
             var entity = _groupRepository.GetByName(name);
             
             if (string.IsNullOrWhiteSpace(entity.Name))
-                return _securityRepository.GateNotFound(currentUser, AccessLogAction.GroupReturn, _object, name);
+                return _securityRepository.Gate(GateType.NotFound, AccessLogAction.GroupReturn, currentUser, _object, name);
 
             _securityRepository.LogUserAction(currentUser, AccessLogAction.GroupReturn, name, _object, true);
 
@@ -73,13 +71,11 @@ namespace DocStore.API.Controllers
         {
             var currentUser = HttpContext.User.Identity.Name;
 
-            if (_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.GroupCreate, _object, string.Empty);
+            if (!_securityRepository.UserIsAdmin(HttpContext))
+                return _securityRepository.Gate(GateType.Unathorised, AccessLogAction.GroupCreate, currentUser, _object, string.Empty);
 
             _groupRepository.Add(value);
-
             _securityRepository.LogUserAction(currentUser, AccessLogAction.GroupCreate, value.Name, _object, true);
-
             _groupRepository.SaveChanges();
 
             return Ok(value);
@@ -91,16 +87,15 @@ namespace DocStore.API.Controllers
         {
             var currentUser = HttpContext.User.Identity.Name;
 
-            if (_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.GroupUpdate, _object, name);
+            if (!_securityRepository.UserIsAdmin(HttpContext))
+                return _securityRepository.Gate(GateType.Unathorised, AccessLogAction.GroupUpdate, currentUser, _object, name);
 
             var entity = _groupRepository.GetByName(name);
 
             if (string.IsNullOrWhiteSpace(entity.Name))
-                return _securityRepository.GateNotFound(currentUser, AccessLogAction.GroupUpdate, _object, name);
+                return _securityRepository.Gate(GateType.NotFound, AccessLogAction.GroupUpdate, currentUser, _object, name);
 
             _groupRepository.Edit(value);
-
             _securityRepository.LogUserAction(currentUser, AccessLogAction.GroupUpdate, name, _object, true);
             _groupRepository.SaveChanges();
 
@@ -113,18 +108,16 @@ namespace DocStore.API.Controllers
         {
             var currentUser = HttpContext.User.Identity.Name;
 
-            if (_securityRepository.UserIsAdmin(HttpContext))
-                return _securityRepository.GateUnathorised(currentUser, AccessLogAction.GroupDelete, _object, name);
+            if (!_securityRepository.UserIsAdmin(HttpContext))
+                return _securityRepository.Gate(GateType.Unathorised, AccessLogAction.GroupDelete, currentUser, _object, name);
 
             var entity = _groupRepository.GetByName(name);
 
             if (String.IsNullOrWhiteSpace(entity.Name))
-                return _securityRepository.GateNotFound(currentUser, AccessLogAction.GroupDelete, _object, name);
+                return _securityRepository.Gate(GateType.NotFound, AccessLogAction.GroupDelete, currentUser, _object, name);
 
             _groupRepository.DeleteById(entity.Id);
-
             _securityRepository.LogUserAction(currentUser, AccessLogAction.GroupDelete, name, _object, true);
-
             _groupRepository.SaveChanges();
 
             return Ok();
