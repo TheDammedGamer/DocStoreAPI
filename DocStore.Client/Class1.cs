@@ -4,5 +4,6 @@ namespace DocStore.Client
 {
     public class Class1
     {
+        
     }
 }
